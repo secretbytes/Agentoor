@@ -3,18 +3,18 @@
 import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Chat } from '@/components/_main/chat'
-import { useWalletStore } from '@/store/useWalletStore'
 import { useAgentStore } from '@/store/useAgentStore'
 import { useAppKitAccount } from '@reown/appkit/react'
+import { usePrivy } from '@privy-io/react-auth'
 
 export default function AgentPage() {
   const params = useParams()
   const router = useRouter()
-  const {isConnected} = useAppKitAccount()
+  const {authenticated} = usePrivy()
   const { agents, selectAgent, selectedAgent } = useAgentStore()
 
   useEffect(() => {
-    if (!isConnected) {
+    if (!authenticated) {
       router.push('/')
       return
     }
@@ -29,9 +29,9 @@ export default function AgentPage() {
     } else {
       router.push('/')
     }
-  }, [params.agent, isConnected, agents, selectAgent, router])
+  }, [params.agent, authenticated, agents, selectAgent, router])
 
-  if (!isConnected || !selectedAgent) {
+  if (!authenticated || !selectedAgent) {
     return null
   }
 

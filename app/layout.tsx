@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/_layout/navbar";
 import { headers } from "next/headers"; // added
-import ContextProvider from "@/context";
+// import ContextProvider from "@/context";
+import Providers from "@/providers/privy-provider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,18 +16,22 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Await headers and extract cookies
-  const resolvedHeaders = headers();
-  const cookies = resolvedHeaders.get("cookie");
+  const headersList = await headers();
+  const cookies = headersList.get('cookie');
 
   return (
     <html lang="en">
       <body>
-        <ContextProvider cookies={cookies}>
+        {/* <ContextProvider cookies={cookies}> */}
+        <Providers>
+
           <Navbar />
           <main className="min-h-screen bg-background pt-16">
             {children}
           </main>
-        </ContextProvider>
+
+        </Providers>
+        {/* </ContextProvider> */}
       </body>
     </html>
   );

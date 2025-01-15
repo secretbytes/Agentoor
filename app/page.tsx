@@ -4,7 +4,8 @@ import { ConnectButton } from '@/components/_main/connect-button'
 import { AgentGrid } from '@/components/_main/agent-grid'
 
 
-import {  useAppKitAccount } from '@reown/appkit/react'
+// import {  useAppKitAccount } from '@reown/appkit/react'
+import { usePrivy } from '@privy-io/react-auth'
 export default function Home() {
   return (
     <div className="container mx-auto py-6">
@@ -14,10 +15,10 @@ export default function Home() {
 }
 
 function ConnectWalletSection() {
-    const { isConnected } = useAppKitAccount()
-  
-
-  if (!isConnected) {
+    // const { isConnected } = useAppKitAccount()
+    // const isConnected = false
+    const {authenticated} = usePrivy()
+  if (!authenticated) {
     return <ConnectButton />
   }
 

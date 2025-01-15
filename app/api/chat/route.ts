@@ -4,7 +4,7 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents'
 import { DynamicTool } from '@langchain/core/tools'
 import { agent1Functions } from '@/functions/agent1'
 import { agent2Functions } from '@/functions/agent2'
-import { agent3Functions } from '@/functions/agent3'
+import {  executeSwap, requestQuoteSol } from '@/functions/agent3'
 import { agent4Functions } from '@/functions/agent4'
 import { agent5Functions } from '@/functions/agent5'
 
@@ -42,42 +42,99 @@ export async function POST(req: NextRequest) {
 function getToolsForAgent(agent: string) {
   switch (agent) {
     case 'agent-1':
-      return [
-        new DynamicTool({
-          name: "getBalance",
-          description: "Get the balance of a given address",
-          func: async (address: string) => JSON.stringify(await agent1Functions.getBalance(address)),
-        }),
-        new DynamicTool({
-          name: "transfer",
-          description: "Transfer SOL to a given address",
-          func: async (input: string) => {
-            const [to, amount] = input.split(',')
-            return JSON.stringify(await agent1Functions.transfer(to, Number(amount)))
-          },
-        }),
-      ]
+  return [
+    new DynamicTool({
+      name: "fetchDLMMPools",
+      description: "Fetch all available DLMM pools",
+      func: async () => await agent1Functions.fetchDLMMPools(),
+    }),
+    new DynamicTool({
+      name: "fetchPoolsByToken",
+      description: "Fetch DLMM pools filtered by a specific token address",
+      func: async (token: string) => await agent1Functions.fetchPoolsByToken(token),
+    }),
+    new DynamicTool({
+      name: "addLiquidityToPosition",
+      description: "Add liquidity to an existing position in a DLMM pool. Input format: 'connection,poolAddress,userPublicKey,user,totalXAmount,totalYAmount,totalRangeInterval'",
+      func: async (input: string) => await agent1Functions.addLiquidityToPosition(input),
+    }),
+    new DynamicTool({
+      name: "createLiquidityPosition",
+      description: "Create a new liquidity position and add initial liquidity. Input format: 'connection,poolAddress,userPublicKey,user,totalXAmount,totalYAmount,totalRangeInterval'",
+      func: async (input: string) => await agent1Functions.createLiquidityPosition(input),
+    }),
+  ]
     case 'agent-2':
-      return [
-        new DynamicTool({
-          name: "getNFTs",
-          description: "Get NFTs for a given address",
-          func: async (address: string) => JSON.stringify(await agent2Functions.getNFTs(address)),
-        }),
-      ]
+  return [
+    new DynamicTool({
+      name: "initializeDLMMPool",
+      description: "Initialize a DLMM pool and get its active bin information. Input format: 'connection,poolAddress'",
+      func: async (input: string) => await agent2Functions.initializeDLMMPool(input),
+    }),
+    new DynamicTool({
+      name: "getUserPositions",
+      description: "Get all positions for a user in a specific pool. Input format: 'connection,poolAddress,userPublicKey'",
+      func: async (input: string) => await agent2Functions.getUserPositions(input),
+    }),
+    new DynamicTool({
+      name: "createPosition",
+      description: "Create a new position and add initial liquidity. Input format: 'connection,poolAddress,userPublicKey,totalXAmount,rangeInterval'",
+      func: async (input: string) => await agent2Functions.createPosition(input),
+    }),
+    new DynamicTool({
+      name: "removeLiquidity",
+      description: "Remove liquidity from a position. Input format: 'connection,poolAddress,userPublicKey,positionPublicKey,shouldClaimAndClose'",
+      func: async (input: string) => await agent2Functions.removeLiquidity(input),
+    }),
+    new DynamicTool({
+      name: "performSwap",
+      description: "Perform a swap operation. Input format: 'connection,poolAddress,userPublicKey,swapAmount,swapYtoX,slippageBps'",
+      func: async (input: string) => await agent2Functions.performSwap(input),
+    }),
+  ]
     case 'agent-3':
       return [
         new DynamicTool({
-          name: "deployContract",
-          description: "Deploy a smart contract",
-          func: async (code: string) => JSON.stringify(await agent3Functions.deployContract(code)),
+          name: "requestSwapQuote",
+          description: "Get a quote for swapping tokens on Solana. Input should be a JSON string with format: {fromTokenAddress: string, toTokenAddress: string, fromAmount: string}",
+          func: async (input: string) => {
+            try {
+              const { fromTokenAddress, toTokenAddress, fromAmount } = JSON.parse(input);
+              console.log("---------------------------------------------------")
+              console.log("fromTokenAddress", fromTokenAddress)
+              console.log("toTokenAddress", toTokenAddress)
+              console.log("fromAmount", fromAmount)
+              if (!fromTokenAddress || !toTokenAddress || !fromAmount) {
+                throw new Error("Missing required parameters");
+              }
+              
+              const routes = await requestQuoteSol(fromTokenAddress, toTokenAddress, fromAmount);
+              return JSON.stringify(routes);
+            } catch (error) {
+              throw new Error(`Failed to get swap quote: ${error.message}`);
+            }
+          }
         }),
+        
         new DynamicTool({
-          name: "verifyContract",
-          description: "Verify a deployed contract",
-          func: async (address: string) => JSON.stringify(await agent3Functions.verifyContract(address)),
-        }),
-      ]
+          name: "executeTokenSwap",
+          description: "Execute a token swap on Solana. Input should be a JSON string with format: {fromTokenAddress: string, toTokenAddress: string, fromAmount: string}",
+          func: async (input: string) => {
+            try {
+              const { fromTokenAddress, toTokenAddress, fromAmount } = JSON.parse(input);
+              
+              if (!fromTokenAddress || !toTokenAddress || !fromAmount) {
+                throw new Error("Missing required parameters");
+              }
+              
+              const result = await executeSwap(fromTokenAddress, toTokenAddress, fromAmount);
+              return JSON.stringify(result);
+            } catch (error) {
+              throw new Error(`Failed to execute swap: ${error.message}`);
+            }
+          }
+        })
+      ];
     case 'agent-4':
       return [
         new DynamicTool({

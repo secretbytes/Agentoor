@@ -2,23 +2,27 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { useDisconnect } from '@reown/appkit/react'
-import { useAppKit, useAppKitAccount } from '@reown/appkit/react'
+// import { useDisconnect } from '@reown/appkit/react'
+// import { useAppKit, useAppKitAccount } from '@reown/appkit/react'
+import { usePrivy } from '@privy-io/react-auth'
 
 export function ConnectButton() {
  const [mounted, setMounted] = useState(false)
-   const { open } = useAppKit()
-   const { isConnected, address, status} = useAppKitAccount()
-   const { disconnect } = useDisconnect()
-   
+  //  const { open } = useAppKit()
+  //  const { isConnected, address, status} = useAppKitAccount()
+  //  const { disconnect } = useDisconnect()
+  //  const isConnected = false
+  const {login  } = usePrivy()
    useEffect(() => {
      setMounted(true)
+     
  
    }, [])
  
    const connectWallet = async () => {
      try {
-       open()
+      //  open()
+      login()
      } catch (error) {
        console.error(error)
      }
@@ -28,7 +32,7 @@ export function ConnectButton() {
  
    if (!mounted) return null
  
-   const displayAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : ''
+  //  const displayAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : ''
  
 
   return (
