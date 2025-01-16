@@ -1,16 +1,21 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { Agent, Message } from '../types/agent'
+import { Agent, ChatItem, ChatHistory } from '../types/agent'
 
 interface AgentState {
   agents: Agent[]
   selectedAgent: Agent | null
-  messages: Record<string, Message[]>
+  messages: Record<string, ChatItem[]>
+  chatHistories: ChatHistory[]
+  currentChatId: string | null
   setAgents: (agents: Agent[]) => void
   selectAgent: (agent: Agent) => void
-  addMessage: (agentId: string, message: Message) => void
+  addMessage: (agentId: string, item: ChatItem) => void
   clearMessages: (agentId: string) => void
-  getMessages: (agentId: string) => Message[]
+  getMessages: (agentId: string) => ChatItem[]
+  createNewChat: () => void
+  selectChatHistory: (chatId: string) => void
+  saveChatHistory: () => void
 }
 
 export const useAgentStore = create<AgentState>()(
@@ -50,14 +55,17 @@ export const useAgentStore = create<AgentState>()(
       ],
       selectedAgent: null,
       messages: {},
+      chatHistories: [],
+      currentChatId: null,
       setAgents: (agents) => set({ agents }),
       selectAgent: (agent) => set({ selectedAgent: agent }),
-      addMessage: (agentId, message) => set((state) => ({
-        messages: {
+      addMessage: (agentId, item) => set((state) => {
+        const updatedMessages = {
           ...state.messages,
-          [agentId]: [...(state.messages[agentId] || []), message]
+          [state.currentChatId || agentId]: [...(state.messages[state.currentChatId || agentId] || []), item]
         }
-      })),
+        return { messages: updatedMessages }
+      }),
       clearMessages: (agentId) => set((state) => ({
         messages: {
           ...state.messages,
@@ -66,8 +74,25 @@ export const useAgentStore = create<AgentState>()(
       })),
       getMessages: (agentId) => {
         const state = get()
-        return state.messages[agentId] || []
-      }
+        return state.messages[state.currentChatId || agentId] || []
+      },
+      createNewChat: () => set((state) => {
+        const newChatId = Date.now().toString()
+        return {
+          currentChatId: newChatId,
+          chatHistories: [...state.chatHistories, { id: newChatId, agentId: state.selectedAgent?.id || '', createdAt: Date.now() }]
+        }
+      }),
+      selectChatHistory: (chatId) => set({ currentChatId: chatId }),
+      saveChatHistory: () => set((state) => {
+        if (!state.currentChatId) return {}
+        const updatedHistories = state.chatHistories.map(history => 
+          history.id === state.currentChatId 
+            ? { ...history, messages: state.messages[state.currentChatId] || [] }
+            : history
+        )
+        return { chatHistories: updatedHistories }
+      })
     }),
     {
       name: 'agent-storage',

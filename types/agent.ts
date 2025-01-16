@@ -13,3 +13,11 @@ export interface Agent {
   }
   
   
+export interface ChatHistory {
+  id: string
+  agentId: string
+  createdAt: number
+  messages?: Message[]
+}
+
+export type ChatItem = Message | { type: 'swap', props: any }

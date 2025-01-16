@@ -18,6 +18,7 @@
     "@privy-io/expo": "^0.37.0",
     "@privy-io/react-auth": "^2.0.1",
     "@radix-ui/react-dialog": "^1.1.4",
+    "@radix-ui/react-scroll-area": "^1.2.2",
     "@radix-ui/react-slot": "^1.1.1",
     "@reown/appkit": "^1.6.4",
     "@reown/appkit-adapter-solana": "^1.6.4",
