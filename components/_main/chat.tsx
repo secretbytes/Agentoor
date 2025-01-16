@@ -122,6 +122,7 @@ export function Chat() {
                                     : 'bg-muted'
                             }`}
                         >
+                          
                             {message.content}
                         </div>
                     </div>
