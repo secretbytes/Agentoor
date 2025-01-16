@@ -49,6 +49,7 @@ export default function SwapInterface(prop) {
     // console.log("🚀 ~ SwapInterface ~ inAmount", inAmount)
     // console.log("🚀 ~ SwapInterface ~ outAmount", outAmount)
     // console.log("🚀 ~ SwapInterface ~ slippage", slippage)
+  const slippage = prop.props.slippage / 100
 
 
 
@@ -56,19 +57,7 @@ export default function SwapInterface(prop) {
   return (
     <div className="min-h-screen bg-[#F8F7FD] p-6">
       <div className="max-w-xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 bg-purple-500 rounded-full overflow-hidden">
-            <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/orbitui.jpg-psgev6Nv3w0p8Zni0fgCAgUbkKQwJj.jpeg"
-              alt="Orbit Logo"
-              width={48}
-              height={48}
-              className="object-cover"
-            />
-          </div>
-          <h1 className="text-2xl font-medium text-gray-700">Orbit</h1>
-        </div>
+       
 
         {/* Main Card */}
         <Card className="p-6 bg-white shadow-sm">
@@ -82,8 +71,8 @@ export default function SwapInterface(prop) {
                 <div className="flex items-center gap-3 mb-2">
                   <div className="relative">
                     <Image
-                      src={swapData.from.icon || "/placeholder.svg"}
-                      alt={swapData.from.symbol}
+                      src={prop.props.fromTokenLogo || "/placeholder.svg"}
+                      alt={prop.props.fromTokenSymbol}
                       width={40}
                       height={40}
                       className="rounded-full"
@@ -91,7 +80,7 @@ export default function SwapInterface(prop) {
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-purple-100 rounded-full" />
                   </div>
                   <div>
-                    <div className="font-bold text-lg">{swapData.from.symbol}</div>
+                    <div className="font-bold text-lg">{prop.props.fromTokenSymbol}</div>
                     <div className="text-gray-500 text-sm">{swapData.from.network}</div>
                   </div>
                 </div>
@@ -113,8 +102,8 @@ export default function SwapInterface(prop) {
                   <div className="relative">
                     <div className={`w-10 h-10 ${swapData.to.bgColor ? 'bg-black' : ''} rounded-full flex items-center justify-center`}>
                       <Image
-                        src={swapData.to.icon || "/placeholder.svg"}
-                        alt={swapData.to.symbol}
+                        src={prop.props.toTokenLogo || "/placeholder.svg"}
+                        alt={prop.props.toTokenSymbol}
                         width={24}
                         height={24}
                         className="rounded-full"
@@ -123,7 +112,7 @@ export default function SwapInterface(prop) {
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-purple-100 rounded-full" />
                   </div>
                   <div>
-                    <div className="font-bold text-lg">{swapData.to.symbol}</div>
+                    <div className="font-bold text-lg">{prop.props.toTokenSymbol}</div>
                     <div className="text-gray-500 text-sm">{swapData.to.network}</div>
                   </div>
                 </div>
@@ -161,7 +150,7 @@ export default function SwapInterface(prop) {
                   </svg>
                   <span>Slippage Setting</span>
                 </div>
-                <span className="font-medium">{prop.props.Slippage}</span>
+                <span className="font-medium">{slippage}%</span>
               </div>
 
               <div className="flex justify-between items-center text-gray-600">

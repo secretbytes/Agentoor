@@ -13,20 +13,22 @@ export const requestQuoteSol = async (fromToken : string, toToken: string, fromA
       throw new Error("Missing required parameters");
     }
     const fromTokenAddressObject = await getTokenDetails(fromToken);
+    console.log("fromTokenAddressObject", fromTokenAddressObject)
     const fromTokenAddress = fromTokenAddressObject?.address;
-    console.log("fromTokenAddress", fromTokenAddress)
+    // console.log("fromTokenAddress", fromTokenAddress)
     const fromTokenDecimals = fromTokenAddressObject?.decimals;
     const fromTokenAmount = parseFloat(fromAmount )* Math.pow(10, fromTokenDecimals);
-    console.log("fromTokenAmount", fromTokenAmount)
+    // console.log("fromTokenAmount", fromTokenAmount)
     const fromTokenLogo = fromTokenAddressObject?.logoURI;
+    const fromTokenSymbol = fromTokenAddressObject?.symbol;
     
 
     const toTokenAddressObject = await getTokenDetails(toToken);
     const toTokenAddress = toTokenAddressObject?.address;
-    console.log("toTokenAddress", toTokenAddress)
+    // console.log("toTokenAddress", toTokenAddress)
     const toTokenDecimals = toTokenAddressObject?.decimals;
     const toTokenLogo = toTokenAddressObject?.logoURI;
-
+    const toTokenSymbol = toTokenAddressObject?.symbol;
 
 
     const params = {
@@ -43,17 +45,21 @@ export const requestQuoteSol = async (fromToken : string, toToken: string, fromA
 
     const smt  = await getSwapData(response.data, walletAddress)
     // console.log("smt ----------------------", smt)
-    const inAmount = fromTokenAmount;
+    // const inAmount = fromTokenAmount;
     const outAmount = parseInt(response.data.outAmount) / Math.pow(10, toTokenDecimals);
 
     
     const data = {
       transactionData: smt.swapTransaction,
       slippage:response.data.slippageBps,
-      inAmount:inAmount,
+      inAmount:fromAmount,
       outAmount:outAmount,
       inCA: response.data.inputMint,
       outCA: response.data.outputMint,
+      fromTokenLogo:fromTokenLogo,
+      toTokenLogo:toTokenLogo,
+      fromTokenSymbol:fromTokenSymbol,
+      toTokenSymbol:toTokenSymbol,
 
     }
 
