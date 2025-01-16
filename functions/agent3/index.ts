@@ -1,35 +1,78 @@
 // import { ChainType,getStepTransaction, getStatus,  executeRoute, getChains, getRoutes, RoutesRequest } from '@lifi/sdk';
+import { getTokenDetails } from '@/helper/helper';
 import axios from 'axios';
-import { ChainType, executeRoute, getChains, getRoutes, RoutesRequest } from '@lifi/sdk';
+// import { ChainType, executeRoute, getChains, getRoutes, RoutesRequest } from '@lifi/sdk';
 
-export const requestQuoteSol = async (fromTokenAddress : string, toTokenAddress: string, fromAmount: string) => {
+export const requestQuoteSol = async (fromToken : string, toToken: string, fromAmount: string, walletAddress:string) => {
   try {
     const url = `https://quote-api.jup.ag/v6/quote`;
+
+
+
+    if (!fromToken || !toToken || !fromAmount) {
+      throw new Error("Missing required parameters");
+    }
+    const fromTokenAddressObject = await getTokenDetails(fromToken);
+    const fromTokenAddress = fromTokenAddressObject?.address;
+    console.log("fromTokenAddress", fromTokenAddress)
+    const fromTokenDecimals = fromTokenAddressObject?.decimals;
+    const fromTokenAmount = parseFloat(fromAmount )* Math.pow(10, fromTokenDecimals);
+    console.log("fromTokenAmount", fromTokenAmount)
+    const fromTokenLogo = fromTokenAddressObject?.logoURI;
+    
+
+    const toTokenAddressObject = await getTokenDetails(toToken);
+    const toTokenAddress = toTokenAddressObject?.address;
+    console.log("toTokenAddress", toTokenAddress)
+    const toTokenDecimals = toTokenAddressObject?.decimals;
+    const toTokenLogo = toTokenAddressObject?.logoURI;
+
+
+
     const params = {
       inputMint:fromTokenAddress,
       outputMint:toTokenAddress,
-      amount:fromAmount,
-      slippageBps : 30,
+      amount:fromTokenAmount,
+      slippageBps : 300,
     };
 
-    const response = await axios.get(url, { params });
-    console.log("response", response.data)
 
-    const smt  = await getSwapData(response.data, "DCUN96uamHLHiV1j3wVMC3uzRHxtuXB1mCs1p2bcLnEp")
-    console.log("smt ----------------------", smt)
-    return response.data; 
+    const response = await axios.get(url, { params });
+    // console.log("response", response.data)
+    // console.log(response)
+
+    const smt  = await getSwapData(response.data, walletAddress)
+    // console.log("smt ----------------------", smt)
+    const inAmount = fromTokenAmount;
+    const outAmount = parseInt(response.data.outAmount) / Math.pow(10, toTokenDecimals);
+
+    
+    const data = {
+      transactionData: smt.swapTransaction,
+      slippage:response.data.slippageBps,
+      inAmount:inAmount,
+      outAmount:outAmount,
+      inCA: response.data.inputMint,
+      outCA: response.data.outputMint,
+
+    }
+
+
+
+
+    return data; 
   } catch (error) {
     console.error('Error fetching quote:', error);
     throw new Error('Failed to fetch quote');
   }
 };
 
-export async function getSwapData(quoteResponse : string, userPublicKey:string) {
+export async function getSwapData(quoteResponse : string, walletAddress:string) {
   try {
     const url = 'https://quote-api.jup.ag/v6/swap';
     const payload = {
       quoteResponse,
-      userPublicKey:"DCUN96uamHLHiV1j3wVMC3uzRHxtuXB1mCs1p2bcLnEp",
+      userPublicKey:walletAddress,
       wrapAndUnwrapSol:true,
     };
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { SwapExecutor } from '@/components/tempcomp'
+import SwapExecutor from '@/components/tempcomp'
 // import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 
 export default function SwapPage() {

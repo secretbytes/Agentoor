@@ -6,10 +6,16 @@ import { Input } from '@/components/ui/input'
 import { useAgentStore } from '@/store/useAgentStore'
 import { Card } from '@/components/ui/card'
 import { Send } from 'lucide-react'
+import { useAppKitAccount } from '@reown/appkit/react'
+import  SwapInterface  from '@/components/_swap/swap-interface'
+
 export function Chat() {
     const { selectedAgent, addMessage, getMessages } = useAgentStore()
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [showSwapInterface, setShowSwapInterface] = useState(false)
+    const {address} = useAppKitAccount()
+    const [prop, setProp] = useState({})
   
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault()
@@ -17,7 +23,7 @@ export function Chat() {
   
       const userMessage = {
         id: Date.now().toString(),
-        content: input,
+        content: input +  ` and my wallet address is ${address}`,
         role: 'user' as const,
         timestamp: Date.now()
       }
@@ -43,6 +49,16 @@ export function Chat() {
         }
   
         const data = await response.json()
+        console.log("🚀 ~ handleSubmit ~ data ---------------", data)
+        const toolResponses = data.toolResponses[0].response
+        const responseData = JSON.parse(toolResponses)
+
+        setProp(responseData)
+        const tool = data.toolResponses[0].tool
+        console.log("🚀 ~ handleSubmit ~ toolResponses", toolResponses)
+
+        // Show SwapInterface when tool is requestSwapQuote
+        setShowSwapInterface(tool === "requestSwapQuote")
   
         addMessage(selectedAgent.id, {
           id: (Date.now() + 1).toString(),
@@ -94,6 +110,7 @@ export function Chat() {
               </div>
             </div>
           ))}
+          {showSwapInterface && <SwapInterface props={prop} />}
         </div>
         <form onSubmit={handleSubmit} className="p-4 border-t flex gap-2">
           <Input
@@ -110,4 +127,3 @@ export function Chat() {
       </Card>
     )
   }
-  
