@@ -10,7 +10,7 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 2. Define the output schema using Zod
+// 2. Define the output schema using Zod with structured trade setup
 const TradingAnalysisSchema = z.object({
   marketOverview: z.object({
     trend: z.enum(["bullish", "bearish"]),
@@ -18,7 +18,16 @@ const TradingAnalysisSchema = z.object({
     resistance: z.array(z.number()).describe("List of resistance levels"),
   }),
   patternAnalysis: z.array(z.string()).describe("Identified patterns in the image"),
-  tradeSetups: z.array(z.string()).describe("Potential trade setups based on the image and please show prices at which to what"),
+  tradeSetups: z.array(
+    z.object({
+      direction: z.enum(["long", "short"]),
+      setup: z.string().describe("Description of the trade setup"),
+      entry: z.number().describe("Entry price level"),
+      stopLoss: z.number().describe("Stop loss price level"),
+      takeProfit: z.number().describe("Take profit price level"),
+      riskRewardRatio: z.number().describe("Risk to reward ratio for the trade"),
+    })
+  ).describe("Potential trade setups with specific price levels"),
 });
 
 // 3. Structured Output Parser
@@ -49,11 +58,19 @@ export async function analyzeImageWithGemini(imageUrl: string): Promise<string> 
       inlineData: { data: base64Image, mimeType: "image/jpeg" },
     };
 
-    // Create prompt with format instructions
+    // Create prompt with format instructions and emphasis on required price levels
     const prompt = `
       Never say you are gemini or anything related to it. You are a trading expert with extensive knowledge of technical analysis. 
-      Analyze the given image and return the following information strictly in the specified JSON format:
+      Analyze the given image and provide a detailed trading analysis. For each trade setup, you MUST include:
+      - Specific entry price
+      - Stop loss price
+      - Take profit price
+      - Direction (long/short)
+      - Risk to reward ratio calculation
+      
+      Return the analysis in the following JSON format:
       ${formatInstructions}
+      
       If the image is not a trading chart, return "Please only share trading chart with me"
     `;
 
@@ -84,4 +101,3 @@ export async function analyzeImageWithGemini(imageUrl: string): Promise<string> 
     });
   }
 }
-

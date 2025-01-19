@@ -23,3 +23,39 @@ export async function getTokenDetails(tokenName : string) {
       throw new Error('Failed to fetch token details');
     }
   }
+
+  type Token = {
+    address: string;
+    name: string;
+    symbol: string;
+    decimals: number;
+    logoURI: string;
+    tags: string[];
+    daily_volume: number;
+    created_at: string;
+    freeze_authority: string | null;
+    mint_authority: string | null;
+    permanent_delegate: string | null;
+    minted_at: string | null;
+    extensions: {
+      coingeckoId: string;
+    };
+  };
+  
+export  async function getTokenDetailsUsingCA(CA: string): Promise<Token | null> {
+    try {
+      const response = await fetch("https://tokens.jup.ag/tokens?tags=verified");
+      if (!response.ok) {
+        throw new Error("Failed to fetch token data");
+      }
+  
+      const tokens: Token[] = await response.json();
+      const token = tokens.find((t) => t.address === CA);
+  
+      return token || null;
+    } catch (error) {
+      console.error("Error fetching token details:", error);
+      return null;
+    }
+  }
+  

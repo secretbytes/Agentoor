@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Navbar } from "@/components/_layout/navbar";
+// import { Navbar } from "@/components/_layout/navbar";
+import { Inter } from 'next/font/google'
+
 import { headers } from "next/headers"; 
 import ContextProvider from "@/context";
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,10 +23,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body>
+      <body className={inter.className}>
         <ContextProvider cookies={cookies}>
-          <Navbar />
-          <main className="min-h-screen bg-background pt-16">
+          {/* <Navbar /> */}
+          <main className="min-h-screen bg-background ">
             {children}
           </main>
         </ContextProvider>

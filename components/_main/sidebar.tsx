@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { Wallet, MessageSquare, Terminal, Power, Loader2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useAgentStore } from '@/store/useAgentStore'
 import {
   Dialog,
   DialogContent,
@@ -11,14 +14,27 @@ import {
 } from '@/components/ui/dialog'
 import { useDisconnect } from '@reown/appkit/react'
 import { useAppKit, useAppKitAccount } from '@reown/appkit/react'
-import { Terminal, Power, Loader2 } from 'lucide-react'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from '@/components/ui/sidebar'
 
-export function Navbar() {
+export function SidebarComponent() {
   const [mounted, setMounted] = useState(false)
   const { open } = useAppKit()
   const { isConnected, address, status } = useAppKitAccount()
   const { disconnect } = useDisconnect()
   
+  const { 
+    chatHistories, 
+    selectChatHistory, 
+    currentChatId 
+  } = useAgentStore()
+
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -40,17 +56,15 @@ export function Navbar() {
   const displayAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : ''
 
   return (
-    <nav className="w-full border-b border-primary/30 bg-background/80 backdrop-blur-sm">
-      <div className="flex items-center justify-between max-w-6xl mx-auto px-4 h-16">
-        <h1 className="text-xl font-bold font-mono text-primary glitch-text">SUPER_AGENTS</h1>
+    <Sidebar>
+      <SidebarHeader>
         <Dialog>
           <DialogTrigger asChild>
             <Button 
-              variant="outline" 
-              className="ml-auto font-mono border-primary/40 hover:bg-primary/20 hover:text-primary"
+              className="w-full bg-[#2A2E37] hover:bg-[#333842] text-white border-0"
             >
-              <Terminal className="w-4 h-4 mr-2" />
-              {isConnected ? displayAddress : 'INITIALIZE CONNECTION'}
+              <Wallet className="h-4 w-4 mr-2" />
+              {isConnected ? displayAddress : 'Connect Wallet'}
             </Button>
           </DialogTrigger>
           <DialogContent className="terminal-window">
@@ -61,7 +75,7 @@ export function Navbar() {
               {isConnected ? (
                 <>
                   <p className="font-mono text-sm">
-                    <span className="text-primary">STATUS:</span> {status?.toUpperCase()  || 'finding...'}
+                    <span className="text-primary">STATUS:</span> {status?.toUpperCase() || 'finding...'}
                   </p>
                   <p className="font-mono text-sm">
                     <span className="text-primary">ADDRESS:</span> {displayAddress}
@@ -91,8 +105,43 @@ export function Navbar() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
-    </nav>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <motion.button
+                whileHover={{ x: 5 }}
+                className="w-full text-left px-2 py-2 rounded text-gray-400 hover:text-white hover:bg-[#2A2E37] font-mono"
+              >
+                Chat History
+              </motion.button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          {chatHistories.map((chat) => (
+            <SidebarMenuItem key={chat.id}>
+              <SidebarMenuButton
+                asChild
+                onClick={() => selectChatHistory(chat.id)}
+              >
+                <motion.button
+                  whileHover={{ x: 5 }}
+                  className={`w-full text-left px-2 py-2 rounded font-mono flex items-center ${
+                    currentChatId === chat.id ? 'bg-[#2A2E37] text-white' : 'text-gray-400 hover:text-white hover:bg-[#2A2E37]'
+                  }`}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  <span className="flex-1 truncate">
+                    {new Date(chat.createdAt).toLocaleString()}
+                  </span>
+                </motion.button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
+    </Sidebar>
   )
 }
 
+export default SidebarComponent

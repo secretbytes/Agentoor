@@ -2,14 +2,15 @@
 
 import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Chat } from '@/components/_main/chat'
+// import { Chat } from '@/components/_main/chat'
 import { useAgentStore } from '@/store/useAgentStore'
 import { useAppKitAccount } from '@reown/appkit/react'
+import { MainLayout } from '@/components/_main/MainLayout'
 
 export default function AgentPage() {
   const params = useParams()
   const router = useRouter()
-  const {isConnected} = useAppKitAccount()
+  const { isConnected } = useAppKitAccount()
   const { agents, selectAgent, selectedAgent } = useAgentStore()
 
   useEffect(() => {
@@ -31,15 +32,17 @@ export default function AgentPage() {
   }, [params.agent, isConnected, agents, selectAgent, router])
 
   if (!isConnected || !selectedAgent) {
-    return null
+    return (<>
+    
+    No agent found
+    
+    </>)
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-2xl  font-bold text-center mb-6">
-        Chat with {selectedAgent.agentName}
-      </h1>
-      <Chat />
+    <div className="container mx-auto  ">
+      {/* <Chat /> */}
+      <MainLayout/>
     </div>
   )
 }

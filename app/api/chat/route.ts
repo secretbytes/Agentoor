@@ -4,16 +4,22 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents'
 import { DynamicTool } from '@langchain/core/tools'
 import { agent1Functions } from '@/functions/agent1'
 import { agent2Functions } from '@/functions/agent2'
-import { getSwapData, requestQuoteSol } from '@/functions/agent3'
+import {  requestQuoteSol } from '@/functions/agent3'
 import { agent4Functions } from '@/functions/agent4'
 import { agent5Functions } from '@/functions/agent5'
-import { getTokenDetails } from '@/helper/helper'
+import { createDLMMPosition } from '@/functions/agent3/create-dlmm'
+import { createSolanaConnection } from '@/lib/solana'
+
+// import { getTokenDetails } from '@/helper/helper'
+
+
 
 export async function POST(req: NextRequest) {
   try {
     const { messages, agent } = await req.json()
 
     // Array to store tool responses
+    
     const toolResponses: { tool: string; response: any }[] = []
 
     const model = new ChatOpenAI({ 
@@ -28,7 +34,7 @@ export async function POST(req: NextRequest) {
         name: tool.name,
         description: tool.description,
         func: async (...args: any[]) => {
-          const response = await originalFunc(...args)
+          const response = await originalFunc(...args) 
           toolResponses.push({
             tool: tool.name,
             response: response
@@ -121,12 +127,11 @@ function getToolsForAgent(agent: string) {
       return [
         new DynamicTool({
           name: "requestSwapQuote",
-          description: "Get a quote for swapping tokens on Solana. Input should be a JSON string with format: {fromToken: string, toToken: string, fromAmount: string, walletAddress: string}",
+          description: "Get a quote for swapping tokens on Solana, don't give any details in the output not even token logos or slippage. Input should be a JSON string with format: {fromToken: string, toToken: string, fromAmount: string, walletAddress: string}",
           func: async (input: string) => {
             try {
-              const { fromToken, toToken, fromAmount, walletAddress } = JSON.parse(input);
-              
-              
+              const { fromToken, toToken, fromAmount, walletAddress,  } = JSON.parse(input);
+  
              
 
 
@@ -140,32 +145,40 @@ function getToolsForAgent(agent: string) {
               //@ts-expect-error some error
               routes.method = "requestSwapQuote";
               
-              console.log("routes ----------------", routes)
+              // console.log("routes ----------------", routes)
               return JSON.stringify(routes);
             } catch (error) {
               throw new Error(`Failed to get swap quote: ${error.message}`);
             }
           }
         }),
-        
+
         new DynamicTool({
-          name: "executeTokenSwap",
-          description: "Execute a token swap on Solana. Input should be a JSON string with format: {fromTokenAddress: string, toTokenAddress: string, fromAmount: string}",
+          name: "createDLMMPosition",
+          description: "Create a new DLMM position and add initial liquidity. Input should be a json string with format: {pairAddress: string, walletAddress: string, positionKey: string, amount: string}",
           func: async (input: string) => {
-            try {
-              const { fromTokenAddress, toTokenAddress, fromAmount } = JSON.parse(input);
-              
-              if (!fromTokenAddress || !toTokenAddress || !fromAmount) {
-                throw new Error("Missing required parameters");
-              }
-              
-              const result = await executeSwap(fromTokenAddress, toTokenAddress, fromAmount);
-              return JSON.stringify(result);
-            } catch (error) {
-              throw new Error(`Failed to execute swap: ${error.message}`);
-            }
-          }
-        })
+            console.log("input", input)
+          const {pairAddress, walletAddress, positionKey, amount} = JSON.parse(input)
+            const connection = await createSolanaConnection() 
+            console.log("pairAddress", pairAddress)
+            console.log("publicKey", walletAddress)
+            console.log("positionKey", positionKey)
+            console.log("amount", amount)
+
+            const response = await createDLMMPosition({
+              pairAddress,
+              publicKey: walletAddress,
+              positionKey,
+              amount,
+              connection
+            })
+            console.log("Response ---------------- ",response)
+
+            return "outcopde is kkm"
+          },
+        }),
+        
+        
       ];
     case 'agent-4':
       return [

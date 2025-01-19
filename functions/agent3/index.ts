@@ -1,5 +1,5 @@
 // import { ChainType,getStepTransaction, getStatus,  executeRoute, getChains, getRoutes, RoutesRequest } from '@lifi/sdk';
-import { getTokenDetails } from '@/helper/helper';
+import { getTokenDetails, getTokenDetailsUsingCA } from '@/helper/helper';
 import axios from 'axios';
 // import { ChainType, executeRoute, getChains, getRoutes, RoutesRequest } from '@lifi/sdk';
 
@@ -8,10 +8,19 @@ export const requestQuoteSol = async (fromToken : string, toToken: string, fromA
     const url = `https://quote-api.jup.ag/v6/quote`;
 
 
-
+    
     if (!fromToken || !toToken || !fromAmount) {
       throw new Error("Missing required parameters");
     }
+
+    // const fromTokenAddressObject = 
+    // fromToken.length > 7 
+    //   ? await getTokenDetailsUsingCA(fromToken) // Use CA method for larger inputs
+    //   : await getTokenDetails(fromToken);    
+  
+
+
+
     const fromTokenAddressObject = await getTokenDetails(fromToken);
     console.log("fromTokenAddressObject", fromTokenAddressObject)
     const fromTokenAddress = fromTokenAddressObject?.address;
@@ -21,6 +30,13 @@ export const requestQuoteSol = async (fromToken : string, toToken: string, fromA
     // console.log("fromTokenAmount", fromTokenAmount)
     const fromTokenLogo = fromTokenAddressObject?.logoURI;
     const fromTokenSymbol = fromTokenAddressObject?.symbol;
+
+
+
+    // const toTokenAddressObject = 
+    // fromToken.length > 7 
+    //   ? await getTokenDetailsUsingCA(fromToken) // Use CA method for larger inputs
+    //   : await getTokenDetails(fromToken);   
     
 
     const toTokenAddressObject = await getTokenDetails(toToken);
@@ -40,18 +56,18 @@ export const requestQuoteSol = async (fromToken : string, toToken: string, fromA
 
 
     const response = await axios.get(url, { params });
-    // console.log("response", response.data)
+    console.log("response", response.data)
     // console.log(response)
 
     const smt  = await getSwapData(response.data, walletAddress)
     // console.log("smt ----------------------", smt)
     // const inAmount = fromTokenAmount;
     const outAmount = parseInt(response.data.outAmount) / Math.pow(10, toTokenDecimals);
-
+    const slippage = response.data.slippageBps / 100;
     
     const data = {
       transactionData: smt.swapTransaction,
-      slippage:response.data.slippageBps,
+      slippage: slippage,
       inAmount:fromAmount,
       outAmount:outAmount,
       inCA: response.data.inputMint,
@@ -60,6 +76,8 @@ export const requestQuoteSol = async (fromToken : string, toToken: string, fromA
       toTokenLogo:toTokenLogo,
       fromTokenSymbol:fromTokenSymbol,
       toTokenSymbol:toTokenSymbol,
+      usdvalue:response.data.swapUsdValue,
+      priceImpact:response.data.priceImpactPct,
 
     }
 
