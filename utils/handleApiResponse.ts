@@ -4,7 +4,7 @@ type ChatItem = {
     role: "user" | "assistant"
     timestamp: number
     imageUrl?: string
-    type?: "swap" | "vision" | "getDLMM" | "createPosition"
+    type?: "swap" | "vision" | "getDLMM" | "createPosition" | "activePositions" | "removeLiquidity" 
     props?: any
   }
 
@@ -48,7 +48,7 @@ type ChatItem = {
             content: "",
           }
         }
-        if (tool === 'getDLMMPositions'){
+        if (tool === 'addLiquidity'){
             processedResponse.responseComponent = {
                 id: Date.now().toString(),
             role: "assistant",
@@ -59,12 +59,33 @@ type ChatItem = {
             }
         }
 
-        if (tool === "createDLMMPosition"){
+        if (tool === "specialfunction2"){
             processedResponse.responseComponent = {
                 id: Date.now().toString(),
             role: "assistant",
             timestamp: Date.now(),
             type: "createPosition",
+            props: parsedToolResponse,
+            content: "",
+            }
+        }
+
+        if (tool === "removeLiquidity"){
+            processedResponse.responseComponent = {
+                id: Date.now().toString(),
+            role: "assistant",
+            timestamp: Date.now(),
+            type: "activePositions",
+            props: parsedToolResponse,
+            content: "",
+            }
+        }
+        if (tool === "specialfunction1"){
+            processedResponse.responseComponent = {
+                id: Date.now().toString(),
+            role: "assistant",
+            timestamp: Date.now(),
+            type: "removeLiquidity",
             props: parsedToolResponse,
             content: "",
             }

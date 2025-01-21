@@ -98,7 +98,7 @@ export default function DLMMPositions({ pairs, handleSubmit }: DLMMPositionsProp
     <div className="w-full">
       <Card className="bg-[#1C1E21] border border-gray-800 shadow-lg">
         <div className="p-4">
-          <h2 className="text-primary text-xl font-mono mb-4">Solana Pools</h2>
+          {/* <h2 className="text-primary text-xl font-mono mb-4">Solana Pools</h2> */}
           <Accordion type="single" collapsible className="space-y-2">
             {pairs.map((pair) => (
               <AccordionItem
@@ -143,7 +143,7 @@ export default function DLMMPositions({ pairs, handleSubmit }: DLMMPositionsProp
                             tokenDetails[pair.mint_x]?.decimals || 0
                           )
                           handleSubmit(
-                            `Deposit to ${pair.address} with amount ${tokenAmount}`,
+                            `execute specialfunction2 ${pair.address} with amount ${tokenAmount}`,
                             Number.parseFloat(amounts[pair.address])
                           )
                         }}

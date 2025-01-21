@@ -1,49 +1,80 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-// import { Chat } from '@/components/_main/chat'
 import { useAgentStore } from '@/store/useAgentStore'
 import { useAppKitAccount } from '@reown/appkit/react'
 import { MainLayout } from '@/components/_main/MainLayout'
+import { WhitelistModal } from '@/components/WhitelistModal'
 
 export default function AgentPage() {
   const params = useParams()
   const router = useRouter()
-  const { isConnected } = useAppKitAccount()
+  const { isConnected, address } = useAppKitAccount()
   const { agents, selectAgent, selectedAgent } = useAgentStore()
+  const [notWhitelisted, setNotWhitelisted] = useState(false)
 
   useEffect(() => {
-    if (!isConnected) {
-      router.push('/')
-      return
+    const checkWhitelist = async () => {
+      if (!isConnected || !address) {
+        router.push('/')
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/beta/auth?address=${address}`)
+        const data = await response.json()
+
+        if (!data.whitelisted) {
+          setNotWhitelisted(true)
+        } else {
+          const agentName = (params.agent as string).replace(/-/g, ' ')
+          const agent = agents.find(
+            a => a.agentName.toLowerCase() === agentName.toLowerCase()
+          )
+
+          if (agent) {
+            selectAgent(agent)
+          } else {
+            router.push('/')
+          }
+        }
+      } catch (error) {
+        console.error('Error checking whitelist:', error)
+        router.push('/')
+      }
     }
 
-    const agentName = (params.agent as string).replace(/-/g, ' ')
-    const agent = agents.find(
-      a => a.agentName.toLowerCase() === agentName.toLowerCase()
+    checkWhitelist()
+  }, [params.agent, isConnected, address, agents, selectAgent, router])
+
+  if (!isConnected) {
+    return (
+      <div className="container mx-auto text-primary font-mono">
+        Not connected
+      </div>
     )
+  }
 
-    if (agent) {
-      selectAgent(agent)
-    } else {
-      router.push('/')
-    }
-  }, [params.agent, isConnected, agents, selectAgent, router])
+  if (notWhitelisted) {
+    return (
+      <div className="container mx-auto">
+        <WhitelistModal isOpen={true} onClose={() => {}} />
+      </div>
+    )
+  }
 
-  if (!isConnected || !selectedAgent) {
-    return (<>
-    
-    No agent found
-    
-    </>)
+  if (!selectedAgent) {
+    return (
+      <div className="container mx-auto text-primary font-mono">
+        No agent found
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto  ">
-      {/* <Chat /> */}
-      <MainLayout/>
+    <div className="container mx-auto bg-[#111214]">
+      <MainLayout />
     </div>
   )
 }
-

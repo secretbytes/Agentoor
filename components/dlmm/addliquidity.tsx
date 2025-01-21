@@ -1,18 +1,17 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import {  useAppKitAccount, useAppKitProvider, } from "@reown/appkit/react"
-import { useAppKitConnection, type Provider } from '@reown/appkit-adapter-solana/react'
+import {   useAppKitProvider, } from "@reown/appkit/react"
+import { type Provider } from '@reown/appkit-adapter-solana/react'
 import {  ComputeBudgetProgram, Keypair, PublicKey,Transaction, TransactionInstruction } from "@solana/web3.js"
 import { createSolanaConnection } from "@/lib/solana"
-
+import bs58 from 'bs58'
 
 
 
 export default function AddLiquidityButton({ data }) {
-  const { address } = useAppKitAccount()
   const { walletProvider } = useAppKitProvider<Provider>('solana')
-    console.log("Add liquidity button data ", data)
+    // console.log("Add liquidity button data ", data)
   async function handleAddLiq() {
     // try {
       const publicKey = await walletProvider.publicKey;
@@ -21,10 +20,11 @@ export default function AddLiquidityButton({ data }) {
   
       const {
         createPositionTx
-        = "", positionPubKey, pastPositionKey } = data
-        console.log(positionPubKey)
-        const signer =  new Keypair(positionPubKey)
-      const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
+        = "", privateKey } = data
+        // console.log(positionPubKey)
+        const decodedPrivateKey = bs58.decode(privateKey);
+        const signer = Keypair.fromSecretKey(decodedPrivateKey);
+const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
         microLamports: 900000,
       });
       console.log("Add Priority Fee : ", addPriorityFee)

@@ -9,7 +9,9 @@ import { agent4Functions } from '@/functions/agent4'
 // import { agent5Functions } from '@/functions/agent5'
 import { createDLMMPosition } from '@/functions/agent3/create-dlmm'
 import { createSolanaConnection } from '@/lib/solana'
-import { getUserPositions } from '@/components/dlmm/getPositions'
+import { getUserPositions } from '@/functions/agent3/get-positions'
+import { removeLiquidity } from '@/functions/agent3/remove-liquidity'
+
 // import { parse } from 'path'
 
 // import { getTokenDetails } from '@/helper/helper'
@@ -101,8 +103,8 @@ function getToolsForAgent(agent: string) {
         }),
 
         new DynamicTool({
-          name: "createDLMMPosition",
-          description: "Create a new DLMM position and add initial liquidity. Input should be a json string with format: {pairAddress: string, walletAddress: string, positionKey: string, amount: string}",
+          name: "specialfunction2",
+          description: "executes specialfunction2. Input should be a json string with format: {pairAddress: string, walletAddress: string, positionKey: string, amount: string}",
           func: async (input: string) => {
             console.log("input", input)
             const {pairAddress, walletAddress, positionKey, amount} = JSON.parse(input)
@@ -127,8 +129,8 @@ function getToolsForAgent(agent: string) {
           },
         }),
         new DynamicTool({
-          name: "getDLMMPositions",
-          description: "Get DLMM positions for a specific token pair. Input should be a search term (e.g. 'sol-usdc')",
+          name: "addLiquidity",
+          description: "Adds Liquidity to available liquidity pools. Input should be a search term (e.g. 'sol-usdc')",
           func: async (input: string) => {
             try {
               // Encode the search term for the URL
@@ -136,7 +138,7 @@ function getToolsForAgent(agent: string) {
               console.log("Search Term")
               // Make the API call to fetch DLMM positions
               const response = await fetch(
-                `https://dlmm-api.meteora.ag/pair/all_with_pagination?limit=1&search_term=${searchTerm}`
+                `https://dlmm-api.meteora.ag/pair/all_with_pagination?limit=3&search_term=${searchTerm}`
               );
         
               if (!response.ok) {
@@ -159,12 +161,13 @@ function getToolsForAgent(agent: string) {
         }),
         
         new DynamicTool({
-          name: "getMyActivePositions",
-          description: "fetches liquidity pool positions of user which are active.",
+          name: "removeLiquidity",
+          verbose: false,
+          description: "Removes Liquidity from current active positions.  Input should be a json string with format: { walletAddress: string, positionKey: string}",
           func: async (input: string) => {
             console.log("input --", input)
-            const walletAddress = encodeURIComponent(input);
-              
+            const {walletAddress, positionKey} = JSON.parse(input);
+              console.log(positionKey)
             if (!walletAddress) {
               throw new Error('Wallet address is required');
             }
@@ -214,6 +217,35 @@ function getToolsForAgent(agent: string) {
           },
         }),
 
+
+        new DynamicTool({
+          name: "specialfunction1",
+          description: "execute specialfunction1 .Input should be a json string with format: {pairAddress: string, walletAddress: string, removePositionKey: string}",
+          func: async (input: string) => {
+            // const [name, symbol] = input.split(',')
+            const {pairAddress, walletAddress, removePositionKey} = JSON.parse(input)
+            console.log("pair adress", pairAddress)
+            console.log("walletAddress", walletAddress)
+            console.log("positionKey", removePositionKey)
+
+            if (!pairAddress || !walletAddress || !removePositionKey) {
+              throw new Error('Missing required parameters');
+          }
+
+            const connection = createSolanaConnection();
+
+            const result = await removeLiquidity({
+              pairAddress,
+              publicKey: walletAddress,
+              positionKey:removePositionKey,
+              connection
+          });
+
+            console.log("resultOutput --------------------", result)
+
+            return JSON.stringify(result)
+          },
+        }),
 
 
       ];

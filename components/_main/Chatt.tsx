@@ -19,6 +19,8 @@ import type { Provider } from "@reown/appkit-adapter-solana/react"
 import { handleApiResponse } from "@/utils/handleApiResponse"
 import DLMMPositions from "../dlmm/getliquidity"
 import AddLiquidityButton from "../dlmm/addliquidity"
+import ActivePositions from "../dlmm/activepositions"
+import  {HandleRemoveLiq, RemoveLiquidityButton } from "../dlmm/removeliquidity"
 
 type ChatItem = {
   id: string
@@ -148,7 +150,9 @@ export function Chat() {
                   userMessage.content +
                   (address
                     ? ` and my wallet address is ${address}
-                          and my positionKey is ${positionKey} `
+                        and my positionKey is ${positionKey} 
+                        `
+                        
                     : ""),
               },
             ],
@@ -325,6 +329,18 @@ export function Chat() {
                     ): item.type === "createPosition" ? (
                         <div className="max-w-2xl">
                           <AddLiquidityButton data={item.props} />
+                        </div>
+                      )
+                    
+                    :item.type === "activePositions" ? (
+                        <div className="max-w-2xl">
+                          <ActivePositions positions={item.props.data} handleSubmit={handleSubmit} />
+                        </div>
+                      )
+                    
+                    :item.type === "removeLiquidity" ? (
+                        <div className="max-w-2xl">
+                          <RemoveLiquidityButton data={item.props}  />
                         </div>
                       )
                     

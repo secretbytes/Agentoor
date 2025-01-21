@@ -1,79 +1,59 @@
-import { Connection, PublicKey } from '@solana/web3.js';
-import DLMM from '@meteora-ag/dlmm';
-import BN from 'bn.js';
+"use client"
 
-interface RemoveLiquidityParams {
-    pairAddress: string;
-    publicKey: string;
-    positionKey: string;
-    connection: Connection;
-}
+import { createSolanaConnection } from "@/lib/solana"
+import { useAppKitProvider } from "@reown/appkit/react"
+import { ComputeBudgetProgram, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js"
+import type { Provider } from "@reown/appkit-adapter-solana/react"
+import { Button } from "../ui/button"
+import { useState } from "react"
 
-interface RemoveLiquidityResult {
-    removeLiquidityTx: any;  // Replace 'any' with actual transaction type from DLMM if available
-    error?: string;
-}
+export function RemoveLiquidityButton({ data }) {
+  const { walletProvider } = useAppKitProvider<Provider>("solana")
+  const [isLoading, setIsLoading] = useState(false)
 
-export async function removeLiquidity({
-    pairAddress,
-    publicKey,
-    positionKey,
-    connection
-}: RemoveLiquidityParams): Promise<RemoveLiquidityResult> {
+  const handleRemoveLiq = async () => {
+    setIsLoading(true)
     try {
-        // Validate inputs
-        if (!pairAddress) {
-            throw new Error('pairAddress is required');
-        }
-        if (!publicKey) {
-            throw new Error('publicKey is required');
-        }
-        if (!positionKey) {
-            throw new Error('positionKey is required');
-        }
+      const connection = createSolanaConnection()
 
-        // Convert string addresses to PublicKey objects
-        const POOL_ADDRESS = new PublicKey(pairAddress);
-        const userPublicKey = new PublicKey(publicKey);
-        const positionPublicKey = new PublicKey(positionKey);
+      const { removeLiquidityTx = "" } = data
+      console.log("🚀 ~ handleRemoveLiq ~ removeLiquidityTx:", removeLiquidityTx)
 
-        // Initialize DLMM pool
-        const dlmmPool = await DLMM.create(connection, POOL_ADDRESS);
+      const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
+        microLamports: 900000,
+      })
+      const { blockhash } = await connection.getLatestBlockhash()
 
-        // Get user positions
-        const { userPositions } = await dlmmPool.getPositionsByUserAndLbPair(
-            userPublicKey
-        );
+      const tx = new Transaction({ ...removeLiquidityTx, feePayer: removeLiquidityTx?.feePayer })
+      const instr = removeLiquidityTx.instructions?.map(
+        (i: any) =>
+          new TransactionInstruction({
+            keys: i.keys?.map((k) => ({
+              ...k,
+              pubkey: new PublicKey(k?.pubkey),
+            })),
+            programId: new PublicKey(i?.programId),
+            data: Buffer.from(i?.data),
+          }),
+      )
+      tx.add(...instr, addPriorityFee)
+      tx.feePayer = new PublicKey(removeLiquidityTx?.feePayer) || walletProvider.publicKey
+      tx.recentBlockhash = blockhash
 
-        // Find specific position
-        const userPosition = userPositions.find(({ publicKey }) =>
-            publicKey.equals(positionPublicKey)
-        );
-
-        if (!userPosition) {
-            throw new Error('Position not found');
-        }
-
-        // Get bin IDs to remove
-        const binIdsToRemove = userPosition.positionData.positionBinData.map(
-            (bin) => bin.binId
-        );
-
-        // Remove liquidity
-        const removeLiquidityTx = await dlmmPool.removeLiquidity({
-            position: userPosition.publicKey,
-            user: userPublicKey,
-            binIds: binIdsToRemove,
-            bps: new BN(100 * 100), // 100% removal
-            shouldClaimAndClose: true,
-        });
-
-        return { removeLiquidityTx };
+      const txHash = await walletProvider.signAndSendTransaction(tx)
+      console.log("🚀 ~ handleRemoveLiq ~ txHash:", txHash)
     } catch (error) {
-        console.error('Error removing liquidity:', error);
-        return {
-            error: error instanceof Error ? error.message : 'Failed to remove liquidity',
-            removeLiquidityTx: null
-        };
+      console.error("Error removing liquidity:", error)
+      throw new Error("Failed to remove liquidity")
+    } finally {
+      setIsLoading(false)
     }
+  }
+
+  return (
+    <Button onClick={handleRemoveLiq} disabled={isLoading}>
+      {isLoading ? "Processing..." : "Remove Liquidity"}
+    </Button>
+  )
 }
+

@@ -1,7 +1,7 @@
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import DLMM, { StrategyType } from '@meteora-ag/dlmm';
 import BN from 'bn.js';
-
+import bs58 from 'bs58'
 interface CreatePositionParams {
   pairAddress: string;
   publicKey: string;
@@ -12,7 +12,7 @@ interface CreatePositionParams {
 
 interface CreatePositionResult {
   createPositionTx: Transaction;
-  positionPubKey: Keypair;
+    privateKey: string
 }
 
 export async function createDLMMPosition({
@@ -43,7 +43,8 @@ export async function createDLMMPosition({
     console.log("POOL_ADDRESS", POOL_ADDRESS)
     const newPublicKey = new PublicKey(publicKey);
     console.log("newPublicKey", newPublicKey)
-    const signer  = new Keypair()
+    const signer  = Keypair.generate()
+    const privateKey = bs58.encode(signer.secretKey); 
     const newPositionKey = new PublicKey(signer.publicKey);
     console.log("newPositionKey", newPositionKey)
     console.log("Amoutn", amount)
@@ -79,7 +80,8 @@ export async function createDLMMPosition({
 
     return {
       createPositionTx,
-      positionPubKey: signer,
+    //   positionPubKey: signer,
+    privateKey
     };
   } catch (error) {
     console.error('Error creating balance position:', error);
