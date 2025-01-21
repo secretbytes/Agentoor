@@ -40,23 +40,29 @@ export async function createDLMMPosition({
 
 
     const POOL_ADDRESS = new PublicKey(pairAddress);
+    console.log("POOL_ADDRESS", POOL_ADDRESS)
     const newPublicKey = new PublicKey(publicKey);
-    const newPositionKey = new PublicKey(positionKey);
-    
+    console.log("newPublicKey", newPublicKey)
+    const signer  = new Keypair()
+    const newPositionKey = new PublicKey(signer.publicKey);
+    console.log("newPositionKey", newPositionKey)
+    console.log("Amoutn", amount)
+
     const dlmmPool = await DLMM.create(connection, POOL_ADDRESS);
     const activeBin = await dlmmPool.getActiveBin();
     
-    const TOTAL_RANGE_INTERVAL = 69;
+    const TOTAL_RANGE_INTERVAL = 34;
     const minBinId = activeBin.binId - TOTAL_RANGE_INTERVAL;
     const maxBinId = activeBin.binId + TOTAL_RANGE_INTERVAL;
     
     const activeBinPricePerToken = Number(
       dlmmPool.fromPricePerLamport(Number(activeBin.price))
     );
+    console.log("activeBinPricePerToken", activeBinPricePerToken)
     
     const totalXAmount = new BN(Number(amount));
     const totalYAmount = totalXAmount.muln(Number(activeBinPricePerToken.toString()));
-    
+    console.log(totalXAmount, totalYAmount);
     const newBalancePosition = Keypair.generate();
     
     const createPositionTx = await dlmmPool.initializePositionAndAddLiquidityByStrategy({
@@ -73,7 +79,7 @@ export async function createDLMMPosition({
 
     return {
       createPositionTx,
-      positionPubKey: newBalancePosition,
+      positionPubKey: signer,
     };
   } catch (error) {
     console.error('Error creating balance position:', error);

@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ChatOpenAI } from '@langchain/openai'
 import { initializeAgentExecutorWithOptions } from 'langchain/agents'
 import { DynamicTool } from '@langchain/core/tools'
-import { agent1Functions } from '@/functions/agent1'
-import { agent2Functions } from '@/functions/agent2'
+// import { agent1Functions } from '@/functions/agent1'
+// import { agent2Functions } from '@/functions/agent2'
 import {  requestQuoteSol } from '@/functions/agent3'
 import { agent4Functions } from '@/functions/agent4'
-import { agent5Functions } from '@/functions/agent5'
+// import { agent5Functions } from '@/functions/agent5'
 import { createDLMMPosition } from '@/functions/agent3/create-dlmm'
 import { createSolanaConnection } from '@/lib/solana'
+import { getUserPositions } from '@/components/dlmm/getPositions'
+// import { parse } from 'path'
 
 // import { getTokenDetails } from '@/helper/helper'
 
@@ -17,7 +19,7 @@ import { createSolanaConnection } from '@/lib/solana'
 export async function POST(req: NextRequest) {
   try {
     const { messages, agent } = await req.json()
-
+    // console.log("Messages -----",messages)
     // Array to store tool responses
     
     const toolResponses: { tool: string; response: any }[] = []
@@ -72,57 +74,7 @@ export async function POST(req: NextRequest) {
 
 function getToolsForAgent(agent: string) {
   switch (agent) {
-    case 'agent-1':
-      return [
-        new DynamicTool({
-          name: "fetchDLMMPools",
-          description: "Fetch all available DLMM pools",
-          func: async () => await agent1Functions.fetchDLMMPools(),
-        }),
-        new DynamicTool({
-          name: "fetchPoolsByToken",
-          description: "Fetch DLMM pools filtered by a specific token address",
-          func: async (token: string) => await agent1Functions.fetchPoolsByToken(token),
-        }),
-        new DynamicTool({
-          name: "addLiquidityToPosition",
-          description: "Add liquidity to an existing position in a DLMM pool. Input format: 'connection,poolAddress,userPublicKey,user,totalXAmount,totalYAmount,totalRangeInterval'",
-          func: async (input: string) => await agent1Functions.addLiquidityToPosition(input),
-        }),
-        new DynamicTool({
-          name: "createLiquidityPosition",
-          description: "Create a new liquidity position and add initial liquidity. Input format: 'connection,poolAddress,userPublicKey,user,totalXAmount,totalYAmount,totalRangeInterval'",
-          func: async (input: string) => await agent1Functions.createLiquidityPosition(input),
-        }),
-      ]
-    case 'agent-2':
-      return [
-        new DynamicTool({
-          name: "initializeDLMMPool",
-          description: "Initialize a DLMM pool and get its active bin information. Input format: 'connection,poolAddress'",
-          func: async (input: string) => await agent2Functions.initializeDLMMPool(input),
-        }),
-        new DynamicTool({
-          name: "getUserPositions",
-          description: "Get all positions for a user in a specific pool. Input format: 'connection,poolAddress,userPublicKey'",
-          func: async (input: string) => await agent2Functions.getUserPositions(input),
-        }),
-        new DynamicTool({
-          name: "createPosition",
-          description: "Create a new position and add initial liquidity. Input format: 'connection,poolAddress,userPublicKey,totalXAmount,rangeInterval'",
-          func: async (input: string) => await agent2Functions.createPosition(input),
-        }),
-        new DynamicTool({
-          name: "removeLiquidity",
-          description: "Remove liquidity from a position. Input format: 'connection,poolAddress,userPublicKey,positionPublicKey,shouldClaimAndClose'",
-          func: async (input: string) => await agent2Functions.removeLiquidity(input),
-        }),
-        new DynamicTool({
-          name: "performSwap",
-          description: "Perform a swap operation. Input format: 'connection,poolAddress,userPublicKey,swapAmount,swapYtoX,slippageBps'",
-          func: async (input: string) => await agent2Functions.performSwap(input),
-        }),
-      ]
+    
     case 'agent-3':
       return [
         new DynamicTool({
@@ -132,11 +84,6 @@ function getToolsForAgent(agent: string) {
             try {
               const { fromToken, toToken, fromAmount, walletAddress,  } = JSON.parse(input);
   
-             
-
-
-
-
               // if (!fromTokenAddress || !toTokenAddress || !fromAmount) {
               //   throw new Error("Missing required parameters");
               // }
@@ -158,27 +105,117 @@ function getToolsForAgent(agent: string) {
           description: "Create a new DLMM position and add initial liquidity. Input should be a json string with format: {pairAddress: string, walletAddress: string, positionKey: string, amount: string}",
           func: async (input: string) => {
             console.log("input", input)
-          const {pairAddress, walletAddress, positionKey, amount} = JSON.parse(input)
+            const {pairAddress, walletAddress, positionKey, amount} = JSON.parse(input)
             const connection = await createSolanaConnection() 
             console.log("pairAddress", pairAddress)
             console.log("publicKey", walletAddress)
             console.log("positionKey", positionKey)
             console.log("amount", amount)
-
+            
             const response = await createDLMMPosition({
               pairAddress,
               publicKey: walletAddress,
               positionKey,
-              amount,
+              amount ,
               connection
             })
             console.log("Response ---------------- ",response)
+            // response.pastPositionKey = positionKey
+            console.log("-----------------------------------------")
+            // console.log(response.pastPositionKey)
+            return JSON.stringify(response)
+          },
+        }),
+        new DynamicTool({
+          name: "getDLMMPositions",
+          description: "Get DLMM positions for a specific token pair. Input should be a search term (e.g. 'sol-usdc')",
+          func: async (input: string) => {
+            try {
+              // Encode the search term for the URL
+              const searchTerm = encodeURIComponent(input);
+              console.log("Search Term")
+              // Make the API call to fetch DLMM positions
+              const response = await fetch(
+                `https://dlmm-api.meteora.ag/pair/all_with_pagination?limit=1&search_term=${searchTerm}`
+              );
+        
+              if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+              }
+        
+              const data = await response.json();
+              console.log("Data : -------",data)
 
-            return "outcopde is kkm"
+              // Return the stringified response data
+              return JSON.stringify({
+                method: "getDLMMPositions",
+                data: data
+              });
+              
+            } catch (error) {
+              throw new Error(`Failed to get DLMM positions: ${error.message}`);
+            }
           },
         }),
         
-        
+        new DynamicTool({
+          name: "getMyActivePositions",
+          description: "fetches liquidity pool positions of user which are active.",
+          func: async (input: string) => {
+            console.log("input --", input)
+            const walletAddress = encodeURIComponent(input);
+              
+            if (!walletAddress) {
+              throw new Error('Wallet address is required');
+            }
+      
+            try {
+              //Construct URL with query parameter
+              // const url = `/api/positions?publicKey=${encodeURIComponent(walletAddress)}`;
+              
+              // const response = await fetch(url, {
+              //   method: 'GET',
+              //   headers: {
+              //     'Accept': 'application/json',
+              //   },
+              // });
+              // const connection = 
+              const response =  await getUserPositions(walletAddress)
+              // Check if response is not ok
+              
+              console.log(response)
+              // Parse and return the JSON response
+             
+              return JSON.stringify(response);
+            } catch (error) {
+              // Re-throw the error with a more specific message
+              throw new Error(`Error fetching positions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            }
+          }
+        }),
+
+
+        new DynamicTool({
+          name: "createToken",
+          description: "Create a new token",
+          func: async (input: string) => {
+            const {pairAddress, walletAddress, positionKey} = JSON.parse(input)
+
+            const url =  `/api/remove-liquidity?pairAddress=${pairAddress}&publicKey=${walletAddress}&positionKey=${positionKey}`;
+            
+            try {
+              const response = await fetch(url);
+              const data = await response.json();
+              console.log(data);
+            } catch (error) {
+              console.error('Error:', error);
+            }
+
+          },
+        }),
+
+
+
       ];
     case 'agent-4':
       return [
@@ -196,22 +233,7 @@ function getToolsForAgent(agent: string) {
           func: async (amount: string) => JSON.stringify(await agent4Functions.mintTokens(Number(amount))),
         }),
       ]
-    case 'agent-5':
-      return [
-        new DynamicTool({
-          name: "getMarketData",
-          description: "Get market data",
-          func: async () => JSON.stringify(await agent5Functions.getMarketData()),
-        }),
-        new DynamicTool({
-          name: "tradePair",
-          description: "Trade a pair",
-          func: async (input: string) => {
-            const [pair, amount] = input.split(',')
-            return JSON.stringify(await agent5Functions.tradePair(pair, Number(amount)))
-          },
-        }),
-      ]
+    
     default:
       return []
   }
