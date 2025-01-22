@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 // import { Navbar } from "@/components/_layout/navbar";
 import { Inter } from 'next/font/google'
-
+import { Toaster } from "@/components/ui/sonner"
 import { headers } from "next/headers"; 
 import ContextProvider from "@/context";
 const inter = Inter({ subsets: ['latin'] })
@@ -28,6 +28,7 @@ export default async function RootLayout({
           {/* <Navbar /> */}
           <main className="min-h-screen bg-background ">
             {children}
+            <Toaster />
           </main>
         </ContextProvider>
       </body>

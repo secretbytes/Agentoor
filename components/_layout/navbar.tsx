@@ -35,7 +35,7 @@ export function Navbar() {
       })
       const data = await response.json()
 
-      if (!data.isAllowlisted) {
+      if (!data.isWhitelisted) {
         await disconnect()
         setShowNotAllowlistedModal(true)
       }

@@ -1,4 +1,5 @@
-import { createSolanaConnection } from '@/config/rpcConfig';
+// import { createSolanaConnection } from '@/config/rpcConfig';
+import { createSolanaConnection } from '@/lib/solana';
 import DLMM, { StrategyType } from '@meteora-ag/dlmm';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';

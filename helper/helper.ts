@@ -58,4 +58,35 @@ export  async function getTokenDetailsUsingCA(CA: string): Promise<Token | null>
       return null;
     }
   }
+
+
+export  function transformUserPositions(response: any) {
+    const simplifiedPositions: {
+      [key: string]: {
+        lbPair: {
+          binStep: number;
+          tokenXMint: string;
+          tokenYMint: string;
+        };
+        lbPairPositionsData: {
+          publicKey: string;
+        }[];
+      };
+    } = {};
   
+    // Transform each pair
+    Object.entries(response).forEach(([pairKey, pairData]: [string, any]) => {
+      simplifiedPositions[pairKey] = {
+        lbPair: {
+          binStep: pairData.lbPair.binStep,
+          tokenXMint: pairData.lbPair.tokenXMint,
+          tokenYMint: pairData.lbPair.tokenYMint,
+        },
+        lbPairPositionsData: pairData.lbPairPositionsData.map((position: any) => ({
+          publicKey: position.publicKey,
+        })),
+      };
+    });
+  
+    return simplifiedPositions;
+  }

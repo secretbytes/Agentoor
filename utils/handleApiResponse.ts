@@ -48,7 +48,7 @@ type ChatItem = {
             content: "",
           }
         }
-        if (tool === 'addLiquidity'){
+        else if (tool === 'addLiquidity' ){
             processedResponse.responseComponent = {
                 id: Date.now().toString(),
             role: "assistant",
@@ -59,7 +59,7 @@ type ChatItem = {
             }
         }
 
-        if (tool === "specialfunction2"){
+        else if (tool === "specialfunction2"){
             processedResponse.responseComponent = {
                 id: Date.now().toString(),
             role: "assistant",
@@ -70,7 +70,7 @@ type ChatItem = {
             }
         }
 
-        if (tool === "removeLiquidity"){
+        else if (tool === "removeLiquidity" ){
             processedResponse.responseComponent = {
                 id: Date.now().toString(),
             role: "assistant",
@@ -80,12 +80,32 @@ type ChatItem = {
             content: "",
             }
         }
-        if (tool === "specialfunction1"){
+        else if (tool === "specialfunction1"){
             processedResponse.responseComponent = {
                 id: Date.now().toString(),
             role: "assistant",
             timestamp: Date.now(),
             type: "removeLiquidity",
+            props: parsedToolResponse,
+            content: "",
+            }
+        }
+        else if (tool === "showActivePositions"){
+            processedResponse.responseComponent = {
+                id: Date.now().toString(),
+            role: "assistant",
+            timestamp: Date.now(),
+            type: "activePositions",
+            props: parsedToolResponse,
+            content: "",
+            }
+        }
+        else if (tool === "getLiquidityPool"){
+            processedResponse.responseComponent = {
+                id: Date.now().toString(),
+            role: "assistant",
+            timestamp: Date.now(),
+            type: "getDLMM",
             props: parsedToolResponse,
             content: "",
             }

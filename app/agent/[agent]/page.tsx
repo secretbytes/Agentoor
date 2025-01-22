@@ -25,7 +25,7 @@ export default function AgentPage() {
         const response = await fetch(`/api/beta/auth?address=${address}`)
         const data = await response.json()
 
-        if (!data.whitelisted) {
+        if (!data.isWhitelisted) {
           setNotWhitelisted(true)
         } else {
           const agentName = (params.agent as string).replace(/-/g, ' ')

@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react'
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
@@ -23,24 +23,46 @@ interface TradingAnalysis {
   tradeSetups: TradeSetup[]
 }
 
-export function TradingAnalysis({ analysis }:{analysis: string}) {
-  const Analysis = JSON.parse(analysis) as TradingAnalysis
+function ErrorMessage({ message }: { message: string }) {
+  return (
+    <div className="flex items-center justify-center ">
+      <Card className="bg-black/40 border border-primary/20 w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center text-xl font-mono text-primary">Invalid Input</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-primary/60 font-mono">{message}</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
-  if (Analysis.marketOverview.trend === undefined) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Card className="bg-black/40 border border-primary/20 w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center text-xl font-mono text-primary">Invalid Input</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center text-primary/60 font-mono">
-              Please only share images of charts.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
+export function TradingAnalysis({ analysis }: { analysis: string }) {
+  let parsedAnalysis: TradingAnalysis
+
+  try {
+    parsedAnalysis = JSON.parse(analysis) as TradingAnalysis
+  } catch (error) {
+    return <ErrorMessage message="Please only share images of charts." />
+  }
+
+  if (!parsedAnalysis || typeof parsedAnalysis !== "object") {
+    return <ErrorMessage message="Please only share images of charts." />
+  }
+
+  const { marketOverview, patternAnalysis, tradeSetups } = parsedAnalysis
+
+  if (!marketOverview || !patternAnalysis || !tradeSetups) {
+    return <ErrorMessage message="Please only share images of charts." />
+  }
+
+  if (
+    marketOverview.trend === undefined ||
+    !Array.isArray(marketOverview.support) ||
+    !Array.isArray(marketOverview.resistance)
+  ) {
+    return <ErrorMessage message="Please only share images of charts." />
   }
 
   return (
@@ -50,7 +72,7 @@ export function TradingAnalysis({ analysis }:{analysis: string}) {
         <CardHeader className="bg-black/40 border-b border-primary/20">
           <CardTitle className="flex items-center gap-2 text-xl font-mono text-primary">
             Market Overview
-            {Analysis.marketOverview.trend === 'bearish' ? (
+            {marketOverview.trend === "bearish" ? (
               <ArrowDownIcon className="h-5 w-5 text-red-500" />
             ) : (
               <ArrowUpIcon className="h-5 w-5 text-green-500" />
@@ -61,18 +83,18 @@ export function TradingAnalysis({ analysis }:{analysis: string}) {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <span className="font-mono text-primary/80">Trend:</span>
-              <Badge 
-                variant={Analysis.marketOverview.trend === 'bearish' ? 'destructive' : 'default'}
+              <Badge
+                variant={marketOverview.trend === "bearish" ? "destructive" : "default"}
                 className="capitalize font-mono"
               >
-                {Analysis.marketOverview.trend}
+                {marketOverview.trend}
               </Badge>
             </div>
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <span className="font-mono text-primary/80 block mb-3">Support Levels:</span>
                 <div className="flex flex-wrap gap-2">
-                  {Analysis.marketOverview.support.map((level, i) => (
+                  {marketOverview.support.map((level, i) => (
                     <Badge key={i} variant="outline" className="font-mono bg-black/40">
                       ${level.toFixed(2)}
                     </Badge>
@@ -82,7 +104,7 @@ export function TradingAnalysis({ analysis }:{analysis: string}) {
               <div>
                 <span className="font-mono text-primary/80 block mb-3">Resistance Levels:</span>
                 <div className="flex flex-wrap gap-2">
-                  {Analysis.marketOverview.resistance.map((level, i) => (
+                  {marketOverview.resistance.map((level, i) => (
                     <Badge key={i} variant="outline" className="font-mono bg-black/40">
                       ${level.toFixed(2)}
                     </Badge>
@@ -101,7 +123,7 @@ export function TradingAnalysis({ analysis }:{analysis: string}) {
         </CardHeader>
         <CardContent className="pt-6">
           <ul className="space-y-3">
-            {Analysis.patternAnalysis.map((pattern, i) => (
+            {patternAnalysis.map((pattern, i) => (
               <li key={i} className="flex items-center gap-3 text-primary/80 font-mono">
                 <span className="h-2 w-2 rounded-full bg-primary" />
                 <span className="capitalize">{pattern}</span>
@@ -118,10 +140,10 @@ export function TradingAnalysis({ analysis }:{analysis: string}) {
         </CardHeader>
         <CardContent className="pt-6">
           <ul className="space-y-4">
-            {Analysis.tradeSetups.map((setup, i) => (
+            {tradeSetups.map((setup, i) => (
               <li key={i} className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Badge variant={setup.direction === 'short' ? 'destructive' : 'default'} className="font-mono">
+                  <Badge variant={setup.direction === "short" ? "destructive" : "default"} className="font-mono">
                     {setup.direction.toUpperCase()}
                   </Badge>
                   <span className="text-sm text-primary/60 font-mono">{setup.setup}</span>
@@ -154,3 +176,4 @@ export function TradingAnalysis({ analysis }:{analysis: string}) {
 }
 
 export default TradingAnalysis
+

@@ -20,15 +20,17 @@ import { handleApiResponse } from "@/utils/handleApiResponse"
 import DLMMPositions from "../dlmm/getliquidity"
 import AddLiquidityButton from "../dlmm/addliquidity"
 import ActivePositions from "../dlmm/activepositions"
-import  {HandleRemoveLiq, RemoveLiquidityButton } from "../dlmm/removeliquidity"
+import { HandleRemoveLiq, RemoveLiquidityButton } from "../dlmm/removeliquidity"
+import ErrorHandler from "@/components/errorhandler" // Import the ErrorHandler component
+import { toast } from "sonner"
 
 type ChatItem = {
   id: string
-  content: string
+  content: string | React.ReactElement
   role: "user" | "assistant"
   timestamp: number
   imageUrl?: string
-  type?: "swap" | "vision" | "getDLMM"
+  type?: "swap" | "vision" | "getDLMM" | "createPosition" | "activePositions" | "removeLiquidity"
   props?: any
 }
 
@@ -118,7 +120,7 @@ export function Chat() {
     }
 
     setChatItems((prev) => [...prev, userMessage])
-    addMessage(selectedAgent.id, userMessage )
+    addMessage(selectedAgent.id, userMessage)
     setInput("")
     setIsLoading(true)
     setIsInitialState(false)
@@ -152,7 +154,6 @@ export function Chat() {
                     ? ` and my wallet address is ${address}
                         and my positionKey is ${positionKey} 
                         `
-                        
                     : ""),
               },
             ],
@@ -192,7 +193,7 @@ export function Chat() {
         ...prev,
         {
           id: Date.now().toString(),
-          content: "Sorry, I encountered an error. Please try again.",
+          content: <ErrorHandler />,
           role: "assistant",
           timestamp: Date.now(),
         },
@@ -237,11 +238,12 @@ export function Chat() {
 
       const data = await response.json()
       console.log("Image uploaded successfully:", data.url)
+      toast.success("Image uploaded succesfully")
       setImageUrl(data.url)
 
       const userMessage: ChatItem = {
         id: Date.now().toString(),
-        content: "Uploaded an image for analysis",
+        content: "Uploaded an image for analysis. Please hit send to analyze",
         role: "user",
         timestamp: Date.now(),
         imageUrl: data.url,
@@ -277,7 +279,7 @@ export function Chat() {
           <WindowControls />
           <SidebarTrigger />
         </div>
-        <div className="text-gray-400 font-medium">{selectedAgent?.agentName || "Terminal"}</div>
+        <div className="text-gray-400 font-medium">SuperAgents</div>
         <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={handleNewChat}>
           <Plus className="h-4 w-4 mr-2" />
           New Chat
@@ -314,37 +316,20 @@ export function Chat() {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    {item.type === "swap" ? (
+                    {item.type ? (
                       <div className="max-w-2xl">
-                        <SwapInterface props={item.props} />
+                        {item.type === "swap" && <SwapInterface props={item.props} />}
+                        {item.type === "vision" && <TradingAnalysis analysis={item.props.content} />}
+                        {item.type === "getDLMM" && (
+                          <DLMMPositions pairs={item.props.data.pairs} handleSubmit={handleSubmit} />
+                        )}
+                        {item.type === "createPosition" && <AddLiquidityButton data={item.props} />}
+                        {item.type === "activePositions" && (
+                          <ActivePositions positions={item.props} handleSubmit={handleSubmit} />
+                        )}
+                        {item.type === "removeLiquidity" && <RemoveLiquidityButton data={item.props} />}
                       </div>
-                    ) : item.type === "vision" ? (
-                      <div className="max-w-2xl">
-                        <TradingAnalysis analysis={item.props.content} />
-                      </div>
-                    ) : item.type === "getDLMM" ? (
-                      <div className="max-w-2xl">
-                        <DLMMPositions pairs={item.props.data.pairs} handleSubmit={handleSubmit} />
-                      </div>
-                    ): item.type === "createPosition" ? (
-                        <div className="max-w-2xl">
-                          <AddLiquidityButton data={item.props} />
-                        </div>
-                      )
-                    
-                    :item.type === "activePositions" ? (
-                        <div className="max-w-2xl">
-                          <ActivePositions positions={item.props.data} handleSubmit={handleSubmit} />
-                        </div>
-                      )
-                    
-                    :item.type === "removeLiquidity" ? (
-                        <div className="max-w-2xl">
-                          <RemoveLiquidityButton data={item.props}  />
-                        </div>
-                      )
-                    
-                    : (
+                    ) : (
                       <div className={`flex ${item.role === "user" ? "justify-end" : "justify-start"}`}>
                         <div
                           className={`max-w-[80%] rounded-sm px-4 py-2 font-mono text-sm ${
