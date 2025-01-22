@@ -279,7 +279,7 @@ export function Chat() {
           <WindowControls />
           <SidebarTrigger />
         </div>
-        <div className="text-gray-400 font-medium">SuperAgents</div>
+        <div className="text-gray-400 font-medium">SuperAgents (beta)</div>
         <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={handleNewChat}>
           <Plus className="h-4 w-4 mr-2" />
           New Chat

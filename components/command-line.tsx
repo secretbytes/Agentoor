@@ -41,6 +41,7 @@ export function CommandLine({
   }
 
   return (
+    <motion.div>
     <motion.div
       className="flex items-center gap-2 px-4 py-2 bg-[#1C1E21] rounded-lg mx-4 mb-4"
       initial={{ opacity: 0, y: 20 }}
@@ -105,6 +106,15 @@ export function CommandLine({
       >
         <Send className="h-5 w-5" />
       </Button>
+      
+    </motion.div>
+    <motion.div
+        className="text-xs text-gray-500 text-center mt-2 font-mono italic"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        This is a beta version of SuperAgents and can make mistakes.
+      </motion.div>
     </motion.div>
   )
 }
