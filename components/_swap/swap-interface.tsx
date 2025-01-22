@@ -162,7 +162,7 @@ export default function SwapInterface(prop: any) {
           {/* AI Agent */}
           <div className="flex justify-end items-center gap-2 text-primary/60 text-sm mt-4 font-mono">
             <span>AI Agent:</span>
-            <span>Jupiter Exchange</span>
+            <span>SuperSwapper</span>
           </div>
         </div>
       </Card>
