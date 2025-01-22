@@ -40,7 +40,7 @@ export function Chat() {
   useEffect(() => {
     const keyPair = new Keypair()
     if (keyPair) {
-      console.log("keyPair", keyPair)
+    //   console.log("keyPair", keyPair)
       setPositionKey(keyPair)
     }
   }, [])
@@ -174,7 +174,7 @@ export function Chat() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      console.log("File uploaded:", file.name)
+    //   console.log("File uploaded:", file.name)
       // Handle file upload logic here
     }
   }

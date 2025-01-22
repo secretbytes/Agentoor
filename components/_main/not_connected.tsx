@@ -7,7 +7,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
 
 export function NotConnected() {
     const handleConnect = () => {
-        console.log('Connecting wallet...')
+        // console.log('Connecting wallet...')
     }
 
     return (

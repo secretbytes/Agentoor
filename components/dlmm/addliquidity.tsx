@@ -51,7 +51,7 @@ export default function AddLiquidityButton({ data }) {
       tx.sign(signer)
       const txHash = await walletProvider.signAndSendTransaction(tx)
 
-      console.log("🚀 ~ handleAddLiq ~ sendTx:", txHash)
+    //   console.log("🚀 ~ handleAddLiq ~ sendTx:", txHash)
       setTxHash(txHash)
       toast.success("Liquidity added successfully", {
         description: "Your transaction has been processed.",

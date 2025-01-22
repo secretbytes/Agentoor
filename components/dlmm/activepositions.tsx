@@ -67,7 +67,7 @@ function toTokenAmount(amount: string, decimals: number): string {
 export default function ActivePositions({ positions, handleSubmit }: ActivePositionsProps) {
   const [loading, setLoading] = useState(true)
   const [tokenPairs, setTokenPairs] = useState<{ [key: string]: TokenPair }>({})
-    console.log("positions : ", positions)
+    // console.log("positions : ", positions)
   useEffect(() => {
     const fetchTokenData = async () => {
       try {

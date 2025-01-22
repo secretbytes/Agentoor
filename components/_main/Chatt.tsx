@@ -58,10 +58,10 @@ export function Chat() {
   const publicKey = GetSolanaPublicKey(walletProvider)
 
   useEffect(() => {
-    console.log("Initializing chat...")
+    // console.log("Initializing chat...")
     const initializeChat = () => {
       if (!initializedRef.current) {
-        console.log("First time initialization - creating new chat")
+        // console.log("First time initialization - creating new chat")
         createNewChat()
         initializedRef.current = true
         setIsInitialState(true)
@@ -70,11 +70,11 @@ export function Chat() {
 
       if (selectedAgent && currentChatId) {
         const messages = getMessages(currentChatId)
-        console.log("Retrieved messages:", messages)
+        // console.log("Retrieved messages:", messages)
         setChatItems(messages)
         setIsInitialState(messages.length === 0)
       } else {
-        console.log("No selected agent or current chat ID")
+        // console.log("No selected agent or current chat ID")
         setChatItems([])
         setIsInitialState(true)
       }
@@ -96,12 +96,12 @@ export function Chat() {
   const handleSubmit = async (value: string) => {
     if ((!value.trim() && !imageUrl) || !selectedAgent) return
 
-    console.log("Submitting message:", value, "Image URL:", imageUrl)
+    // console.log("Submitting message:", value, "Image URL:", imageUrl)
 
     let userMessage: ChatItem
 
     if (value.startsWith("Hello this is")) {
-      console.log("Received message from DLMM component:", value)
+    //   console.log("Received message from DLMM component:", value)
       userMessage = {
         id: Date.now().toString(),
         content: `Created a dlmm position with pair address ${value.split("Hello this is ")[1]}
@@ -128,16 +128,16 @@ export function Chat() {
     try {
       let responseData
       if (imageUrl) {
-        console.log("Sending image for analysis...")
+        // console.log("Sending image for analysis...")
         const response = await fetch("/api/vision", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ imageUrl }),
         })
         responseData = await response.json()
-        console.log("Received vision response:", responseData)
+        // console.log("Received vision response:", responseData)
       } else {
-        console.log("Sending chat message...")
+        // console.log("Sending chat message...")
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: {
@@ -161,7 +161,7 @@ export function Chat() {
           }),
         })
         responseData = await response.json()
-        console.log("Received chat response:", responseData)
+        // console.log("Received chat response:", responseData)
       }
 
       setImageUrl(null)
@@ -204,7 +204,7 @@ export function Chat() {
   }
 
   const handleNewChat = () => {
-    console.log("Creating new chat...")
+    // console.log("Creating new chat...")
     createNewChat()
     setChatItems([])
     setInput("")
@@ -220,7 +220,7 @@ export function Chat() {
     const file = event.target.files?.[0]
     if (!file) return
 
-    console.log("Uploading file:", file.name)
+    // console.log("Uploading file:", file.name)
 
     const formData = new FormData()
     formData.append("file", file)
@@ -237,7 +237,7 @@ export function Chat() {
       }
 
       const data = await response.json()
-      console.log("Image uploaded successfully:", data.url)
+    //   console.log("Image uploaded successfully:", data.url)
       toast.success("Image uploaded succesfully")
       setImageUrl(data.url)
 

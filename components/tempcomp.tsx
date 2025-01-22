@@ -18,7 +18,7 @@ export function SwapExecutor({ swapTransaction }: { swapTransaction: string }) {
       const deserializedTx = VersionedTransaction.deserialize(swapTransactionBuf)
 
       const result = await walletProvider.signAndSendTransaction(deserializedTx)
-      console.log("🚀 ~ executeSwap ~ result:", result)
+      // console.log("🚀 ~ executeSwap ~ result:", result)
 
       toast.success("Successfully executed the swap!", {
         description: "Your transaction has been processed.",

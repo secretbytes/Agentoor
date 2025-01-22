@@ -8,7 +8,7 @@ import { SwapExecutor } from "@/components/tempcomp"
 
 export default function SwapInterface(prop: any) {
   const slippage = prop.props.slippage
-  console.log("usd Value ",prop.props.usdvalue)
+  // console.log("usd Value ",prop.props.usdvalue)
 
   return (
     <div className="w-full ">

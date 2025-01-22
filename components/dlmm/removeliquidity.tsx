@@ -23,7 +23,7 @@ export function RemoveLiquidityButton({ data }) {
       const connection = createSolanaConnection()
 
       const { removeLiquidityTx = "" } = data
-      console.log("🚀 ~ handleRemoveLiq ~ removeLiquidityTx:", removeLiquidityTx)
+    //   console.log("🚀 ~ handleRemoveLiq ~ removeLiquidityTx:", removeLiquidityTx)
 
       const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
         microLamports: 900000,
@@ -47,7 +47,7 @@ export function RemoveLiquidityButton({ data }) {
       tx.recentBlockhash = blockhash
 
       const txHash = await walletProvider.signAndSendTransaction(tx)
-      console.log("🚀 ~ handleRemoveLiq ~ txHash:", txHash)
+    //   console.log("🚀 ~ handleRemoveLiq ~ txHash:", txHash)
       setTxHash(txHash)
       toast.success("Liquidity removed successfully", {
         description: "Your transaction has been processed.",
