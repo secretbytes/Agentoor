@@ -143,7 +143,7 @@ export default function DLMMPositions({ pairs, handleSubmit }: DLMMPositionsProp
                             tokenDetails[pair.mint_x]?.decimals || 0
                           )
                           handleSubmit(
-                            `execute specialfunction2 ${pair.address} with amount ${tokenAmount}`,
+                            `execute superLiquidityManager ${pair.address} with amount ${tokenAmount}`,
                             Number.parseFloat(amounts[pair.address])
                           )
                         }}

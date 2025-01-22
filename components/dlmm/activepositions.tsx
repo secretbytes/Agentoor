@@ -168,7 +168,7 @@ export default function ActivePositions({ positions, handleSubmit }: ActivePosit
                         onClick={(e) => {
                           e.preventDefault()
                           const removePositionKey = position.lbPairPositionsData[0].publicKey
-                          const message = `execute specialfunction1 with ${pairKey} and removePositionKey is ${removePositionKey}`
+                          const message = `execute superLiquidityRemover with ${pairKey} and removePositionKey is ${removePositionKey}`
                           handleSubmit(message)
                         }}
                       >

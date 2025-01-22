@@ -122,9 +122,9 @@ function getToolsForAgent(agent: string) {
         }),
 
         new DynamicTool({
-          name: "specialfunction2",
+          name: "superLiquidityManager",
           description:
-            "executes specialfunction2. Input should be a json string with format: {pairAddress: string, walletAddress: string, positionKey: string, amount: string}",
+            "executes superLiquidityManager. Input should be a json string with format: {pairAddress: string, walletAddress: string, positionKey: string, amount: string}",
           func: async (input: string) => {
             console.log("input", input)
             const { pairAddress, walletAddress, positionKey, amount } = JSON.parse(input)
@@ -290,28 +290,28 @@ function getToolsForAgent(agent: string) {
           },
         }),
 
+        // new DynamicTool({
+        //   name: "createToken",
+        //   description: "Create a new token",
+        //   func: async (input: string) => {
+        //     const { pairAddress, walletAddress, positionKey } = JSON.parse(input)
+
+        //     const url = `/api/remove-liquidity?pairAddress=${pairAddress}&publicKey=${walletAddress}&positionKey=${positionKey}`
+
+        //     try {
+        //       const response = await fetch(url)
+        //       const data = await response.json()
+        //       console.log(data)
+        //     } catch (error) {
+        //       console.error("Error:", error)
+        //     }
+        //   },
+        // }),
+
         new DynamicTool({
-          name: "createToken",
-          description: "Create a new token",
-          func: async (input: string) => {
-            const { pairAddress, walletAddress, positionKey } = JSON.parse(input)
-
-            const url = `/api/remove-liquidity?pairAddress=${pairAddress}&publicKey=${walletAddress}&positionKey=${positionKey}`
-
-            try {
-              const response = await fetch(url)
-              const data = await response.json()
-              console.log(data)
-            } catch (error) {
-              console.error("Error:", error)
-            }
-          },
-        }),
-
-        new DynamicTool({
-          name: "specialfunction1",
+          name: "superLiquidityRemover",
           description:
-            "execute specialfunction1 .Input should be a json string with format: {pairAddress: string, walletAddress: string, removePositionKey: string}",
+            "execute superLiquidityRemover .Input should be a json string with format: {pairAddress: string, walletAddress: string, removePositionKey: string}",
           func: async (input: string) => {
             // const [name, symbol] = input.split(',')
             const { pairAddress, walletAddress, removePositionKey } = JSON.parse(input)
@@ -380,7 +380,7 @@ async function checkIfGeneralQuery(message: string): Promise<boolean> {
   Function formats:
   - Swap: "swap {amount} {fromToken} to {toToken}"
   - Add Liquidity: "add liquidity {amount} {token1}-{token2}"
-  - Remove Liquidity: "remove liquidity {positionKey}"
+  - Remove Liquidity: "remove liquidity"
   - Show Active Positions: "show active positions {walletAddress}"
   - Create Token: "create token {name},{symbol}"
   - Mint Tokens: "mint {amount} tokens"
@@ -409,7 +409,7 @@ async function checkIfGeneralQuery(message: string): Promise<boolean> {
         errorMessage = "Please use the correct format for adding liquidity: 'add liquidity {amount} {token1}-{token2}'"
         break
       case "remove liquidity":
-        errorMessage = "Please use the correct format for removing liquidity: 'remove liquidity {positionKey}'"
+        errorMessage = "Please use the correct format for removing liquidity: 'remove liquidity '"
         break
       case "show active positions":
         errorMessage =

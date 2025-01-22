@@ -59,7 +59,7 @@ type ChatItem = {
             }
         }
 
-        else if (tool === "specialfunction2"){
+        else if (tool === "superLiquidityManager"){
             processedResponse.responseComponent = {
                 id: Date.now().toString(),
             role: "assistant",
@@ -80,7 +80,7 @@ type ChatItem = {
             content: "",
             }
         }
-        else if (tool === "specialfunction1"){
+        else if (tool === "superLiquidityRemover"){
             processedResponse.responseComponent = {
                 id: Date.now().toString(),
             role: "assistant",
