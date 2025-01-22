@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { useAppKit, useAppKitAccount } from "@reown/appkit/react"
+import { useAppKit, useAppKitAccount, useDisconnect } from "@reown/appkit/react"
 import { Terminal, Loader2, XCircle } from "lucide-react"
 import Image from "next/image"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -13,8 +13,8 @@ export function ConnectButton() {
   const [isLoading, setIsLoading] = useState(false)
   const [showNotAllowlistedModal, setShowNotAllowlistedModal] = useState(false)
   const { open } = useAppKit()
-  const { isConnected, address, disconnect } = useAppKitAccount()
-
+  const { isConnected, address } = useAppKitAccount()
+  const {disconnect} = useDisconnect()
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -82,7 +82,7 @@ export function ConnectButton() {
             className="text-center mb-8"
           >
             <div className="bg-[#1C1E21] shadow-lg mb-8">
-              <Image src="/logo.gif" alt="Super Agents" width={300} height={300} />
+              <Image src="/logo.gif" alt="Super Agents" width={300} height={300} priority />
             </div>
 
             <div className="space-y-4 font-mono">
