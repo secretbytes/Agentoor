@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { headers } from "next/headers"; 
 import ContextProvider from "@/context";
 const inter = Inter({ subsets: ['latin'] })
+import GoogleAnalytics from "@/lib/googleanalytics";
 
 export const metadata: Metadata = {
   title: "SuperAgents",
@@ -24,6 +25,8 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+      <GoogleAnalytics GA_MEASUREMENT_ID="G-BQBHVW3308" />
+
         <ContextProvider cookies={cookies}>
           {/* <Navbar /> */}
           <main className="min-h-screen bg-background ">
