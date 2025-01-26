@@ -297,23 +297,7 @@ function getToolsForAgent(agent: string) {
           },
         }),
 
-        // new DynamicTool({
-        //   name: "createToken",
-        //   description: "Create a new token",
-        //   func: async (input: string) => {
-        //     const { pairAddress, walletAddress, positionKey } = JSON.parse(input)
-
-        //     const url = `/api/remove-liquidity?pairAddress=${pairAddress}&publicKey=${walletAddress}&positionKey=${positionKey}`
-
-        //     try {
-        //       const response = await fetch(url)
-        //       const data = await response.json()
-        //       console.log(data)
-        //     } catch (error) {
-        //       console.error("Error:", error)
-        //     }
-        //   },
-        // }),
+      
 
         new DynamicTool({
           name: "superLiquidityRemover",
