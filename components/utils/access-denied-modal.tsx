@@ -26,7 +26,7 @@ export function AccessDeniedModal({ isOpen }: AccessDeniedModalProps) {
         <DialogHeader>
           <DialogTitle>Access Denied</DialogTitle>
           <DialogDescription>
-            You don&apos;t own enough agent tokens to access beta. You need at least 10,000 tokens to proceed.
+            You don&apos;t own enough SUPER tokens to access beta. You need at least 10,000 tokens to proceed.
           </DialogDescription>
         </DialogHeader>
         
@@ -34,7 +34,7 @@ export function AccessDeniedModal({ isOpen }: AccessDeniedModalProps) {
           <Button variant="outline" onClick={()=>handleDisconnect()}>
             Disconnect
           </Button>
-          <Button onClick={handleGetTokens}>Get Agent Tokens</Button>
+          <Button onClick={handleGetTokens}>Get SUPER Tokens</Button>
         </div>
       </DialogContent>
     </Dialog>
