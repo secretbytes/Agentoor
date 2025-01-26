@@ -1,0 +1,100 @@
+{
+    "lsts": [
+      {
+        "mint": "jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v",
+        "token_program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "name": "Jupiter Staked SOL",
+        "symbol": "JupSOL",
+        "logo_uri": "https://static.jup.ag/jupSOL/icon.png",
+        "decimals": 9,
+        "pool": {
+          "program": "SanctumSplMulti",
+          "pool": "8VpRhuxa7sUUepdY3kQiTmX9rS5vx4WgaXiAnXq4KCtr",
+          "validator_list": "AXL4v4bbzRkqwHmLc9A1YzHQmRhmG9Q93i1e6CPG2bEK",
+          "vote_account": null
+        }
+      },
+      {
+        "mint": "Dso1bDeDjCQxTrWHqUUi63oBvV7Mdm6WaobLbQ7gnPQ",
+        "token_program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "name": "Drift Staked SOL",
+        "symbol": "dSOL",
+        "logo_uri": "https://drift-public.s3.eu-central-1.amazonaws.com/dSOL.svg",
+        "decimals": 9,
+        "pool": {
+          "program": "SanctumSpl",
+          "pool": "9mhGNSPArRMHpLDMSmxAvuoizBqtBGqYdT8WGuqgxNdn",
+          "validator_list": "4dRHzwW2npecE4riAKibHccnMib5jBu9RdFf8bQ2o7Mo",
+          "vote_account": "DriFTm3wM9ugxhCA1K3wVQMSdC4Dv4LNmyZMmZiuHRpp"
+        }
+      },
+      {
+        "mint": "he1iusmfkpAdwvxLNGV8Y1iSbj4rUy6yMhEA3fotn9A",
+        "token_program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "name": "Helius Staked SOL",
+        "symbol": "hSOL",
+        "logo_uri": "https://raw.githubusercontent.com/igneous-labs/lst-offchain-metadata/master/hSOL/hSOL.png",
+        "decimals": 9,
+        "pool": {
+          "program": "SanctumSpl",
+          "pool": "3wK2g8ZdzAH8FJ7PKr2RcvGh7V9VYson5hrVsJM5Lmws",
+          "validator_list": "TCxWHorDSe3vWydw6MGwyexcqm3ZU9RT7VTqiCcN6y9",
+          "vote_account": "he1iusunGwqrNtafDtLdhsUQDFvo13z9sUa36PauBtk"
+        }
+      },
+      {
+        "mint": "bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1",
+        "token_program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "name": "BlazeStake Staked SOL",
+        "symbol": "bSOL",
+        "logo_uri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1/logo.png",
+        "decimals": 9,
+        "pool": {
+          "program": "Spl",
+          "pool": "stk9ApL5HeVAwPLr3TLhDXdZS8ptVu7zp6ov8HFDuMi",
+          "validator_list": "1istpXjy8BM7Vd5vPfA485frrV7SRJhgq5vs3sskWmc",
+          "vote_account": null
+        }
+      },
+      {
+        "mint": "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn",
+        "token_program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "name": "Jito Staked SOL",
+        "symbol": "JitoSOL",
+        "logo_uri": "https://storage.googleapis.com/token-metadata/JitoSOL-256.png",
+        "decimals": 9,
+        "pool": {
+          "program": "Spl",
+          "pool": "Jito4APyf642JPZPx3hGc6WWJ8zPKtRbRs4P815Awbb",
+          "validator_list": "3R3nGZpQs2aZo5FDQvd2MUQ6R7KhAPainds6uT6uE2mn",
+          "vote_account": null
+        }
+      },
+      {
+        "mint": "BNso1VUJnh4zcfpZa6986Ea66P6TCp59hvtNJ8b1X85",
+        "token_program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "name": "Binance Staked SOL",
+        "symbol": "BNSOL",
+        "logo_uri": "https://arweave.net/LepI-hea-JrbLMb4L_HpMzaq9k0aHY2-lVSGiBtwvFM?ext=png",
+        "decimals": 9,
+        "pool": {
+          "program": "Spl",
+          "pool": "Hr9pzexrBge3vgmBNRR8u42CNQgBXdHm4UkUN2DH4a7r",
+          "validator_list": "FQxPPqmKKiRH3q2Sqb1xvdafqbbVyBPpMUnDug4AjtkX",
+          "vote_account": null
+        }
+      },
+      {
+        "mint": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+        "token_program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "name": "Marinade staked SOL",
+        "symbol": "mSOL",
+        "logo_uri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So/logo.png",
+        "decimals": 9,
+        "pool": {
+          "program": "Marinade"
+        }
+      }
+    ]
+  }
+
