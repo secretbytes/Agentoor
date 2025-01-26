@@ -25,14 +25,19 @@ export async function POST(req: NextRequest) {
     const toolResponses: { tool: string; response: any }[] = []
     const isGeneralQuery = await checkIfGeneralQuery(messages[messages.length - 1].content)
 
+    console.log(messages[messages.length - 1].content)
+    const total_query = messages[messages.length - 1].content
+    const actual_query = (total_query.split(" and my wallet address is "))[0]
+    console.log("actual query : ", actual_query)
+
     if (isGeneralQuery) {
       // Handle general query directly without using tools
       const model = new ChatOpenAI({
         modelName: "o1-mini-2024-09-12",
-        temperature: 0,
+        temperature: 1,
       })
 
-      const response = await model.invoke(messages[messages.length - 1].content)
+      const response = await model.invoke(actual_query)
 
       return NextResponse.json({
         result: response.content,
@@ -216,7 +221,9 @@ function getToolsForAgent(agent: string) {
           name: "removeLiquidity",
           verbose: false,
           description:
-            "Provides inteface to remove liquidity.  Input should be a json string with format: { walletAddress: string, positionKey: string}",
+            `Provides inteface to remove liquidity, does not remove liquidity instantly just provides the interface, simply ask user to
+            to choose a pair to remove liquidity from.
+            Input should be a json string with format: { walletAddress: string, positionKey: string}`,
           func: async (input: string) => {
             console.log("input --", input)
             const { walletAddress, positionKey } = JSON.parse(input)
@@ -428,4 +435,3 @@ async function checkIfGeneralQuery(message: string): Promise<boolean> {
     return false
   }
 }
-
