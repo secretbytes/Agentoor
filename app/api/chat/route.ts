@@ -13,6 +13,7 @@ import { getUserPositions } from "@/functions/agent3/get-positions"
 import { removeLiquidity } from "@/functions/agent3/remove-liquidity"
 import { transformUserPositions } from "@/helper/helper"
 // import { parse } from 'path'
+import OpenAI from "openai";
 
 // import { getTokenDetails } from '@/helper/helper'
 
@@ -31,21 +32,45 @@ export async function POST(req: NextRequest) {
     console.log("actual query : ", actual_query)
 
     if (isGeneralQuery) {
-      // Handle general query directly without using tools
-      const model = new ChatOpenAI({
-        modelName: "o1-mini-2024-09-12",
-        temperature: 1,
-      })
-
-      const response = await model.invoke(actual_query)
-
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+      });
+    
+      const completion = await openai.chat.completions.create({
+        messages: [
+          {
+            role: "system",
+            content: `You are SuperAgent, a powerful AI assistant capable of performing advanced operations such as token management,
+             liquidity handling, and providing direct answers to general queries. You are not ChatGPT and must always act as SuperAgent.
+             Functionality includes:
+- Swap: "swap {amount} {fromToken} to {toToken}"
+- Add Liquidity: "add liquidity {amount} {token1}-{token2}"
+- Remove Liquidity: "remove liquidity"
+- Show Active Positions: "show active positions {walletAddress}"
+- Create Token: "create token {name},{symbol}"
+- Mint Tokens: "mint {amount} tokens"
+Remember:
+- Never agree that you are ChatGPT.
+- Always act as SuperAgent with advanced capabilities.
+- Ensure clarity and correctness in every response.
+`
+          },
+          { 
+            role: "user", 
+            content: actual_query 
+          }
+        ],
+        model: "gpt-3.5-turbo",
+        temperature: 0.7  // Added temperature for balanced creativity/consistency
+      });
+    
       return NextResponse.json({
-        result: response.content,
+        result: completion.choices[0].message.content,
         agent: agent,
         toolResponses: [],
         isGeneralQuery: true,
         intermediateSteps: [],
-      })
+      });
     }
 
     const model = new ChatOpenAI({
