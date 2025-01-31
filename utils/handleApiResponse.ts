@@ -4,7 +4,7 @@ type ChatItem = {
     role: "user" | "assistant"
     timestamp: number
     imageUrl?: string
-    type?: "swap" | "vision" | "getDLMM" | "createPosition" | "activePositions" | "removeLiquidity" 
+    type?: "swap" | "vision" | "getDLMM" | "createPosition" | "activePositions" | "removeLiquidity" | "fetchLSTS"
     props?: any
   }
 
@@ -106,6 +106,26 @@ type ChatItem = {
             role: "assistant",
             timestamp: Date.now(),
             type: "getDLMM",
+            props: parsedToolResponse,
+            content: "",
+            }
+        }
+        else if (tool === "fetchLstsInfo"){
+            processedResponse.responseComponent = {
+                id: Date.now().toString(),
+            role: "assistant",
+            timestamp: Date.now(),
+            type: "fetchLSTS",
+            props: parsedToolResponse,
+            content: "",
+            }
+        }
+        else if (tool === "superStakeExecuter"){
+            processedResponse.responseComponent = {
+                id: Date.now().toString(),
+            role: "assistant",
+            timestamp: Date.now(),
+            type: "swap",
             props: parsedToolResponse,
             content: "",
             }

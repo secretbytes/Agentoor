@@ -5,7 +5,6 @@ import { DynamicTool } from "@langchain/core/tools"
 // import { agent1Functions } from '@/functions/agent1'
 // import { agent2Functions } from '@/functions/agent2'
 import { requestQuoteSol } from "@/functions/agent3"
-import { agent4Functions } from "@/functions/agent4"
 // import { agent5Functions } from '@/functions/agent5'
 import { createDLMMPosition } from "@/functions/agent3/create-dlmm"
 import { createSolanaConnection } from "@/lib/solana"
@@ -14,6 +13,9 @@ import { removeLiquidity } from "@/functions/agent3/remove-liquidity"
 import { transformUserPositions } from "@/helper/helper"
 // import { parse } from 'path'
 import OpenAI from "openai";
+import axios from "axios"
+import { fetchUpdatedLsts } from "@/functions/agent3/get-lsts"
+import { json } from "stream/consumers"
 
 // import { getTokenDetails } from '@/helper/helper'
 
@@ -257,16 +259,7 @@ function getToolsForAgent(agent: string) {
             }
 
             try {
-              //Construct URL with query parameter
-              // const url = `/api/positions?publicKey=${encodeURIComponent(walletAddress)}`;
-
-              // const response = await fetch(url, {
-              //   method: 'GET',
-              //   headers: {
-              //     'Accept': 'application/json',
-              //   },
-              // });
-              // const connection =
+             
               const response = await getUserPositions(walletAddress)
               // Check if response is not ok
               const simplifiedResponse = transformUserPositions(response.data)
@@ -293,17 +286,6 @@ function getToolsForAgent(agent: string) {
               throw new Error("Wallet address is required")
             }
 
-            // try {
-            //Construct URL with query parameter
-            // const url = `/api/positions?publicKey=${encodeURIComponent(walletAddress)}`;
-
-            // const response = await fetch(url, {
-            //   method: 'GET',
-            //   headers: {
-            //     'Accept': 'application/json',
-            //   },
-            // });
-            // const connection =
             console.log("++++++++Generating response")
             const response = await getUserPositions(walletAddress)
             console.log("++++++++", response)
@@ -314,10 +296,7 @@ function getToolsForAgent(agent: string) {
             // Parse and return the JSON response
 
             return JSON.stringify(simplifiedResponse)
-            // } catch (error) {
-            //   // Re-throw the error with a more specific message
-            //   throw new Error(`Error fetching positions: ${error instanceof Error ? error.message : 'Unknown error'}`);
-            // }
+       
           },
         }),
 
@@ -353,30 +332,46 @@ function getToolsForAgent(agent: string) {
           },
         }),
         new DynamicTool({
-          name: "generalResponse",
-          description: "general response for any query that does not initiate any other function",
+          name: "fetchLstsInfo",
+          description: `
+            Fetch information about lsts including their APY. This tool retrieves data from the lsts API route. 
+            Input should be a JSON string with format: {} (empty object), as no additional input is required.
+            If the API fails, an error message will be returned.
+          `,
           func: async (input: string) => {
-            const [name, symbol] = input.split(",")
-            return "your general query is understood, this is your ticked code 'kmodi'"
+            try {
+              console.log(input)
+              const response = await fetchUpdatedLsts()
+              console.log("response >> ", response)
+              return JSON.stringify(response.lsts);
+            } catch (error) {
+              throw new Error(`Failed to fetch lsts information: ${error.message}`);
+            }
           },
         }),
-      ]
-    case "agent-4":
-      return [
         new DynamicTool({
-          name: "createToken",
-          description: "Create a new token",
+          name: "superStakeExecuter",
+          description: `
+            Executes superStakeExecuter.
+             Input should be a JSON string with format: { toToken: string, fromAmount: string, walletAddress: string}
+              , if something is missing respond user to what is missing what is the correect format
+          `,
           func: async (input: string) => {
-            const [name, symbol] = input.split(",")
-            return JSON.stringify(await agent4Functions.createToken(name, symbol))
+            console.log("su, " , input)
+            const {toToken, fromAmount, walletAddress} = JSON.parse(input)
+            const fromToken = "sol"
+            const routes = await requestQuoteSol(fromToken, toToken, fromAmount, walletAddress)
+              //@ts-expect-error some error
+              routes.method = "requestSwapQuote"
+
+              // console.log("routes ----------------", routes)
+              return JSON.stringify(routes)
+
           },
         }),
-        new DynamicTool({
-          name: "mintTokens",
-          description: "Mint tokens",
-          func: async (amount: string) => JSON.stringify(await agent4Functions.mintTokens(Number(amount))),
-        }),
+        
       ]
+    
 
     default:
       return []
@@ -399,6 +394,8 @@ async function checkIfGeneralQuery(message: string): Promise<boolean> {
   - Show Active Positions: "show active positions {walletAddress}"
   - Create Token: "create token {name},{symbol}"
   - Mint Tokens: "mint {amount} tokens"
+  - Fetch Lsts info : "fetch lsts info"
+  - Fetch Lsts info : "fetch lsts info"
   
   Respond with:
   - "general" if it's a general query that doesn't need tool execution

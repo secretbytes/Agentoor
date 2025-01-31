@@ -23,6 +23,7 @@ import ActivePositions from "../dlmm/activepositions"
 import { HandleRemoveLiq, RemoveLiquidityButton } from "../dlmm/removeliquidity"
 import ErrorHandler from "@/components/errorhandler" // Import the ErrorHandler component
 import { toast } from "sonner"
+import StakedSolPositions from "../staking/showsol"
 
 type ChatItem = {
   id: string
@@ -161,7 +162,7 @@ export function Chat() {
           }),
         })
         responseData = await response.json()
-        // console.log("Received chat response:", responseData)
+        console.log("Received chat response:", responseData)
       }
 
       setImageUrl(null)
@@ -214,6 +215,9 @@ export function Chat() {
 
   const handleFileUpload = () => {
     fileInputRef.current?.click()
+  }
+  const handleStake = ()=>{
+    console.log("Stake handled")
   }
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -328,7 +332,8 @@ export function Chat() {
                           <ActivePositions positions={item.props} handleSubmit={handleSubmit} />
                         )}
                         {item.type === "removeLiquidity" && <RemoveLiquidityButton data={item.props} />}
-                      </div>
+                        {item.type === "fetchLSTS" && <StakedSolPositions positions={item.props} handleSubmit={handleSubmit} />}
+                      </div> 
                     ) : (
                       <div className={`flex ${item.role === "user" ? "justify-end" : "justify-start"}`}>
                         <div
