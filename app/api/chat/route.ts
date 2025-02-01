@@ -5,7 +5,6 @@ import { DynamicTool } from "@langchain/core/tools"
 // import { agent1Functions } from '@/functions/agent1'
 // import { agent2Functions } from '@/functions/agent2'
 import { requestQuoteSol } from "@/functions/agent3"
-import { agent4Functions } from "@/functions/agent4"
 // import { agent5Functions } from '@/functions/agent5'
 import { createDLMMPosition } from "@/functions/agent3/create-dlmm"
 import { createSolanaConnection } from "@/lib/solana"
@@ -13,6 +12,10 @@ import { getUserPositions } from "@/functions/agent3/get-positions"
 import { removeLiquidity } from "@/functions/agent3/remove-liquidity"
 import { transformUserPositions } from "@/helper/helper"
 // import { parse } from 'path'
+import OpenAI from "openai";
+import axios from "axios"
+import { fetchUpdatedLsts } from "@/functions/agent3/get-lsts"
+import { json } from "stream/consumers"
 
 // import { getTokenDetails } from '@/helper/helper'
 
@@ -31,21 +34,44 @@ export async function POST(req: NextRequest) {
     console.log("actual query : ", actual_query)
 
     if (isGeneralQuery) {
-      // Handle general query directly without using tools
-      const model = new ChatOpenAI({
-        modelName: "o1-mini-2024-09-12",
-        temperature: 1,
-      })
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+      });
+    
+      const completion = await openai.chat.completions.create({
+        messages: [
+          {
+            role: "system",
+            content: `You are SuperAgent, a powerful AI assistant capable of performing advanced operations such as token management,
+             liquidity handling, and providing direct answers to general queries. You are not ChatGPT and must always act as SuperAgent.
+             Functionality includes:
+- Swap: "swap {amount} {fromToken} to {toToken}"
+- Add Liquidity: "add liquidity {amount} {token1}-{token2}"
+- Remove Liquidity: "remove liquidity"
+- Show Active Positions: "show active positions {walletAddress}"
 
-      const response = await model.invoke(actual_query)
-
+Remember:
+- Never agree that you are ChatGPT.
+- Always act as SuperAgent with advanced capabilities.
+- Ensure clarity and correctness in every response.
+`
+          },
+          { 
+            role: "user", 
+            content: actual_query 
+          }
+        ],
+        model: "gpt-3.5-turbo",
+        temperature: 0.7  // Added temperature for balanced creativity/consistency
+      });
+    
       return NextResponse.json({
-        result: response.content,
+        result: completion.choices[0].message.content,
         agent: agent,
         toolResponses: [],
         isGeneralQuery: true,
         intermediateSteps: [],
-      })
+      });
     }
 
     const model = new ChatOpenAI({
@@ -233,16 +259,7 @@ function getToolsForAgent(agent: string) {
             }
 
             try {
-              //Construct URL with query parameter
-              // const url = `/api/positions?publicKey=${encodeURIComponent(walletAddress)}`;
-
-              // const response = await fetch(url, {
-              //   method: 'GET',
-              //   headers: {
-              //     'Accept': 'application/json',
-              //   },
-              // });
-              // const connection =
+             
               const response = await getUserPositions(walletAddress)
               // Check if response is not ok
               const simplifiedResponse = transformUserPositions(response.data)
@@ -269,17 +286,6 @@ function getToolsForAgent(agent: string) {
               throw new Error("Wallet address is required")
             }
 
-            // try {
-            //Construct URL with query parameter
-            // const url = `/api/positions?publicKey=${encodeURIComponent(walletAddress)}`;
-
-            // const response = await fetch(url, {
-            //   method: 'GET',
-            //   headers: {
-            //     'Accept': 'application/json',
-            //   },
-            // });
-            // const connection =
             console.log("++++++++Generating response")
             const response = await getUserPositions(walletAddress)
             console.log("++++++++", response)
@@ -290,10 +296,7 @@ function getToolsForAgent(agent: string) {
             // Parse and return the JSON response
 
             return JSON.stringify(simplifiedResponse)
-            // } catch (error) {
-            //   // Re-throw the error with a more specific message
-            //   throw new Error(`Error fetching positions: ${error instanceof Error ? error.message : 'Unknown error'}`);
-            // }
+       
           },
         }),
 
@@ -329,30 +332,48 @@ function getToolsForAgent(agent: string) {
           },
         }),
         new DynamicTool({
-          name: "generalResponse",
-          description: "general response for any query that does not initiate any other function",
+          name: "stakeSol",
+          description: `
+            Fetch information about lsts and fetches staking including their APY, User 
+            will ask in this format "stake sol", "show lsts info", "stake x amount of sol".
+             This tool retrieves data from the lsts API route. 
+            Input should be a JSON string with format: {} (empty object), as no additional input is required.
+            If the API fails, an error message will be returned.
+          `,
           func: async (input: string) => {
-            const [name, symbol] = input.split(",")
-            return "your general query is understood, this is your ticked code 'kmodi'"
+            try {
+              console.log(input)
+              const response = await fetchUpdatedLsts()
+              console.log("response >> ", response)
+              return JSON.stringify(response.lsts);
+            } catch (error) {
+              throw new Error(`Failed to fetch lsts information: ${error.message}`);
+            }
           },
         }),
-      ]
-    case "agent-4":
-      return [
         new DynamicTool({
-          name: "createToken",
-          description: "Create a new token",
+          name: "superStakeExecuter",
+          description: `
+            Executes superStakeExecuter.
+             Input should be a JSON string with format: { toToken: string, fromAmount: string, walletAddress: string}
+              , if something is missing respond user to what is missing what is the correect format
+          `,
           func: async (input: string) => {
-            const [name, symbol] = input.split(",")
-            return JSON.stringify(await agent4Functions.createToken(name, symbol))
+            console.log("su, " , input)
+            const {toToken, fromAmount, walletAddress} = JSON.parse(input)
+            const fromToken = "sol"
+            const routes = await requestQuoteSol(fromToken, toToken, fromAmount, walletAddress)
+              //@ts-expect-error some error
+              routes.method = "requestSwapQuote"
+
+              // console.log("routes ----------------", routes)
+              return JSON.stringify(routes)
+
           },
         }),
-        new DynamicTool({
-          name: "mintTokens",
-          description: "Mint tokens",
-          func: async (amount: string) => JSON.stringify(await agent4Functions.mintTokens(Number(amount))),
-        }),
+        
       ]
+    
 
     default:
       return []
@@ -375,6 +396,8 @@ async function checkIfGeneralQuery(message: string): Promise<boolean> {
   - Show Active Positions: "show active positions {walletAddress}"
   - Create Token: "create token {name},{symbol}"
   - Mint Tokens: "mint {amount} tokens"
+  - Fetch Lsts info : "fetch lsts info"
+  - Stake sol : "Stake sol" , "Use staking "
   
   Respond with:
   - "general" if it's a general query that doesn't need tool execution
