@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 export const templates = [
   { id: 1, text: "Swap 0.01 sol to usdc" },
   { id: 2, text: "Add liquidity to sol-usdc" },
+  { id: 6, text: "stake sol" },
   { id: 3, text: "Remove liquidity" },
   { id: 4, text: "Show my active positions" },
   { id: 5, text: "Show liquidity pair pools for sol-usdc" },
