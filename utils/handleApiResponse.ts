@@ -110,7 +110,7 @@ type ChatItem = {
             content: "",
             }
         }
-        else if (tool === "fetchLstsInfo"){
+        else if (tool === "stakeSol"){
             processedResponse.responseComponent = {
                 id: Date.now().toString(),
             role: "assistant",
