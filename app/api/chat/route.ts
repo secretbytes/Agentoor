@@ -332,9 +332,11 @@ function getToolsForAgent(agent: string) {
           },
         }),
         new DynamicTool({
-          name: "fetchLstsInfo",
+          name: "stakeSol",
           description: `
-            Fetch information about lsts including their APY. This tool retrieves data from the lsts API route. 
+            Fetch information about lsts and fetches staking including their APY, User 
+            will ask in this format "stake sol", "show lsts info", "stake x amount of sol".
+             This tool retrieves data from the lsts API route. 
             Input should be a JSON string with format: {} (empty object), as no additional input is required.
             If the API fails, an error message will be returned.
           `,
@@ -395,7 +397,7 @@ async function checkIfGeneralQuery(message: string): Promise<boolean> {
   - Create Token: "create token {name},{symbol}"
   - Mint Tokens: "mint {amount} tokens"
   - Fetch Lsts info : "fetch lsts info"
-  - Fetch Lsts info : "fetch lsts info"
+  - Stake sol : "Stake sol" , "Use staking "
   
   Respond with:
   - "general" if it's a general query that doesn't need tool execution
